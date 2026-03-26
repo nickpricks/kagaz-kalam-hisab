@@ -25,7 +25,8 @@ interface ExpenseListProps {
 export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [dateFilter, setDateFilter] = React.useState('all'); // all, today, 7days, 30days
+  const [dateFilter, setDateFilter] = React.useState('all'); // all, today, current_week, current_month, etc.
+  const [customDateRange, setCustomDateRange] = React.useState({ start: '', end: '' });
   const [categoryFilter, setCategoryFilter] = React.useState('all');
   const devMode = isDevMode();
 
@@ -60,14 +61,34 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
     if (dateFilter === 'today') {
       const todayStr = now.toISOString().split('T')[0];
       matchesDate = e.date === todayStr;
-    } else if (dateFilter === '7days') {
-      const sevenDaysAgo = new Date(now);
-      sevenDaysAgo.setDate(now.getDate() - 7);
-      matchesDate = expenseDate >= sevenDaysAgo;
-    } else if (dateFilter === '30days') {
-      const thirtyDaysAgo = new Date(now);
-      thirtyDaysAgo.setDate(now.getDate() - 30);
-      matchesDate = expenseDate >= thirtyDaysAgo;
+    } else if (dateFilter === 'current_week') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      matchesDate = expenseDate >= startOfWeek;
+    } else if (dateFilter === 'current_month') {
+      matchesDate = expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear();
+    } else if (dateFilter === 'last_12_months') {
+      const twelveMonthsAgo = new Date(now);
+      twelveMonthsAgo.setMonth(now.getMonth() - 12);
+      matchesDate = expenseDate >= twelveMonthsAgo;
+    } else if (dateFilter === 'current_fy') {
+      const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+      matchesDate = expenseDate >= new Date(fyStartYear, 3, 1) && expenseDate <= new Date(fyStartYear + 1, 2, 31);
+    } else if (dateFilter === 'last_fy') {
+      const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() - 1 : now.getFullYear() - 2;
+      matchesDate = expenseDate >= new Date(fyStartYear, 3, 1) && expenseDate <= new Date(fyStartYear + 1, 2, 31);
+    } else if (dateFilter === 'custom') {
+      const fromStr = customDateRange.start;
+      const toStr = customDateRange.end;
+      const expenseDateOnly = new Date(expenseDate);
+      expenseDateOnly.setHours(0,0,0,0);
+      
+      const from = fromStr ? new Date(fromStr) : new Date(0);
+      from.setHours(0,0,0,0);
+      const to = toStr ? new Date(toStr) : new Date(8640000000000000);
+      to.setHours(23,59,59,999);
+      
+      matchesDate = expenseDateOnly >= from && expenseDateOnly <= to;
     }
 
     return matchesSearch && matchesCategory && matchesDate;
@@ -98,31 +119,52 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
   const grandTotal = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className="view-expense-list">
-      <div className="view-header">
-        <h2>Your Expenses</h2>
-        <div className="list-summary">
-          Total: <strong>{CONFIG.CURRENCY_SYMBOL}{grandTotal.toFixed(2)}</strong>
+    <div className="space-y-12">
+      {/* Asymmetrical Layout for Header / Balance */}
+      <div className="flex flex-col items-start gap-2">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="h-1.5 w-1.5 rounded-full bg-primary-container animate-[pulse_2s_ease-in-out_infinite]" />
+          <p className="text-on-surface-variant text-xs font-medium uppercase tracking-[0.05em]">Total Balance</p>
+        </div>
+        <div className="text-[3.5rem] leading-none font-semibold tracking-tight text-on-surface flex items-baseline gap-1">
+          <span className="text-primary-container/80 text-3xl font-normal">{CONFIG.CURRENCY_SYMBOL}</span>
+          {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </div>
       </div>
 
-      <div className="filter-panel card">
-        <div className="search-box">
+      <div className="glass-panel p-5 space-y-4">
+        <div className="relative">
           <input
             type="text"
             placeholder="Search notes or categories..."
+            className="input-field pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-        <div className="filter-controls">
-          <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}>
+        <div className="flex flex-wrap gap-3">
+          <select 
+            className="input-field py-2 text-sm appearance-none cursor-pointer flex-1 min-w-[140px]"
+            value={dateFilter} 
+            onChange={(e) => setDateFilter(e.target.value)}
+          >
             <option value="all">All Dates</option>
             <option value="today">Today</option>
-            <option value="7days">Last 7 Days</option>
-            <option value="30days">Last 30 Days</option>
+            <option value="current_week">Current Week</option>
+            <option value="current_month">Current Month</option>
+            <option value="last_12_months">Last 12 Months</option>
+            <option value="current_fy">Current Fin Year</option>
+            <option value="last_fy">Last Fin Year</option>
+            <option value="custom">Custom Range</option>
           </select>
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+          <select 
+            className="input-field py-2 text-sm appearance-none cursor-pointer flex-1 min-w-[140px]"
+            value={categoryFilter} 
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
             <option value="all">All Categories</option>
             {
               Object.values(CATEGORIES).map(cat => (
@@ -131,69 +173,103 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
             }
           </select>
         </div>
+        
+        {dateFilter === 'custom' && (
+          <div className="flex gap-3 animate-fade-in pt-2 border-t border-outline-variant/15 mt-2">
+            <div className="flex-1 space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">From</label>
+              <input 
+                type="date" 
+                className="input-field py-2 text-sm text-on-surface-variant" 
+                value={customDateRange.start} 
+                onChange={e => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))} 
+              />
+            </div>
+            <div className="flex-1 space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">To</label>
+              <input 
+                type="date" 
+                className="input-field py-2 text-sm text-on-surface-variant" 
+                value={customDateRange.end} 
+                onChange={e => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))} 
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {
         sortedDates.length === 0 &&
-        <div className="card empty-state">
-          <p>No matching expenses found.</p>
+        <div className="glass-card p-12 text-center">
+          <p className="text-on-surface-variant font-medium tracking-wide">No matching hisab found.</p>
         </div>
       }
 
-      {
-        sortedDates.map((date) => (
-          <div key={date} className="date-group">
-            <div className="date-header">
-              <span className="date-label">{new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              <span className="date-total">{CONFIG.CURRENCY_SYMBOL}{calculateTotal(groupedExpenses[date]).toFixed(2)}</span>
-            </div>
+      <div className="space-y-10">
+        {
+          sortedDates.map((date) => (
+            <div key={date} className="relative">
+              <div className="sticky top-[72px] z-10 py-3 bg-[#131313]/90 backdrop-blur-xl -mx-4 px-4 flex justify-between items-center mb-6">
+                <span className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant">
+                  {new Date(date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+                <span className="text-xs font-semibold text-on-surface-variant/80">
+                  {CONFIG.CURRENCY_SYMBOL}{calculateTotal(groupedExpenses[date]).toFixed(2)}
+                </span>
+              </div>
 
-            <div className="expense-items">
-              {
-                groupedExpenses[date].map((expense) => (
-                  <div key={expense.id} className="expense-item card">
-                    <div className="expense-main">
-                      <div className="expense-info">
-                        <span className="expense-category">
-                          {
-                            CATEGORIES[expense.category]?.label || expense.category
-                          }
-                          {
-                            expense.subCat && <span className="expense-subcat"> › {expense.subCat}</span>
-                          }
-                        </span>
-                        {
-                          expense.note && <p className="expense-note">{expense.note}</p>
-                        }
+              <div className="space-y-6">
+                {
+                  groupedExpenses[date].map((expense) => (
+                    <div key={expense.id} className="glass-card p-5 group flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <span className="text-base font-semibold text-on-surface tracking-wide">
+                            {CATEGORIES[expense.category]?.label || expense.category}
+                          </span>
+                          {expense.subCat && (
+                            <span className="text-[10px] font-medium uppercase tracking-[0.05em] text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-sm">
+                              {expense.subCat}
+                            </span>
+                          )}
+                        </div>
+                        {expense.note && (
+                          <p className="text-[13px] text-on-surface-variant mt-2 font-normal leading-relaxed line-clamp-2">
+                            {expense.note}
+                          </p>
+                        )}
                       </div>
-                      <div className="expense-amount-wrapper">
-                        <span className="expense-amount">{CONFIG.CURRENCY_SYMBOL}{expense.amount.toFixed(2)}</span>
-                        {
-                          devMode &&
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-lg font-semibold text-on-surface tracking-tight group-hover:text-primary-container transition-colors">
+                          {CONFIG.CURRENCY_SYMBOL}{expense.amount.toFixed(2)}
+                        </span>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {devMode && (
+                            <button
+                              className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                              onClick={() => navigate(AppRoutes.IMPORT, { state: { editExpense: expense } })}
+                              title="Edit (Dev)"
+                            >
+                              Edit
+                            </button>
+                          )}
                           <button
-                            className="edit-btn"
-                            onClick={() => navigate(AppRoutes.IMPORT, { state: { editExpense: expense } })}
-                            title="Edit in Import (DevMode)"
+                            className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant hover:text-red-400 transition-colors cursor-pointer"
+                            onClick={() => handleDelete(expense.id)}
+                            title="Drop"
                           >
-                            📝
+                            Drop
                           </button>
-                        }
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDelete(expense.id)}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              }
+                  ))
+                }
+              </div>
             </div>
-          </div>
-        ))
-      }
+          ))
+        }
+      </div>
     </div>
   );
 };

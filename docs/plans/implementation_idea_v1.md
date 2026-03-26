@@ -6,8 +6,10 @@ This document serves as the project's living roadmap and finalized implementatio
 
 ## 🗺️ Roadmap
 
-### [ ] Phase 2: Cloud Sync (Firebase/Supabase)
-- [ ] **Infrastructure**: Set up Firebase or Supabase project.
+### [ ] Phase 1.9: Before we begin Cloud Sync etc
+- [ ] **Clean Up**: Mechanism to remove local storage data. We can confirm user - wheather to copy to cloud or remove it and reset progress.
+### [ ] Phase 2: Cloud Sync (Supabase)
+- [ ] **Infrastructure**: Set up Supabase project.
 - [ ] **Authentication**: Implement User Login (Google/Email) to protect data.
 - [ ] **Data Sync**: Move from `localStorage` to a hosted database (Firestore/PostgreSQL).
 - [ ] **Conflict Resolution**: Implement "Local-First" sync logic to handle offline edits.

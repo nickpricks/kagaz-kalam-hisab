@@ -8,38 +8,37 @@
 ### Before we go futher
 #### Review
 - Add 
-   * Category is mandatory.
-   * And so is amount.
-   * Sub-Category is optional.
-   * And so is notes.
-   * Mutiple click on amount bubble should keep adding the total amount.
+   * ok
 - List
-   * Need search
-   * List has no filters (today, last 7 days, last 30 days, custom)
-   * Neither category nor sub-category filter.
-   * Delete must confirm
-   * (optional) in devMode and edit button that opens the record in Bulk import tab as json and user can edit and save it.
+   * Need search icon replacement
+   * List needs more filters (curent week, current month, last 12 months, curent financial year, last financial year, custom range)
 -Import
    * Need a mini json parser/validator - or at least some kind of validation to assert the required fileds.
 
-#### Why hashbang - (/#add, /#list, /#import)
-- Need to revert to normal routes
-
 #### Add tests
-- Starting with utils/helpers
-- Gradually add tests for react components as well
+- Need 100% coverage
 
 #### Add New Expense
 - A small undo/reset button (icon) to reset form state
 
 #### About section
 - A small about section with app info.
+- heading text is huge - needs to be consistent with other componenets
 
 #### Documentation
 - After completion - destroy exceptioannly large details - keep the TLDR verions with all main points
+- [x] remove cloud-selection.md
+- [x] remove failed-gh-deploy
+- [x] remove idea_v1_css.md
+- [x] keep their gist
+
+**Documentation Archive (Gists)**:
+- **Cloud Selection**: Supabase (PostgreSQL) is the chosen architecture over Firebase. Better suited for relational data (Category Trees) and future Go CLI/Desktop integrations.
+- **Failed GH Deploy**: GitHub Pages Action failed with 404; requires manual enabling in GitHub Repository Settings -> Pages.
+- **Obsidian Lantern Design**: High-end urban night editorial UI. Uses `#131313`, `#FFC107`, Manrope typography. Defined by the "no-line" rule (ghost borders, heavy glassmorphism) and asymmetrical floating layouts.
 
 #### Github Actions
-- 
+- need to push - to verify deployment
 
 ### Future
 - 
