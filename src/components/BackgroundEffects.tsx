@@ -34,15 +34,15 @@ export const BackgroundEffects: React.FC = () => {
           <rect x="1030" y="130" width="70" height="170" />
           <rect x="1110" y="160" width="90" height="140" />
           
-          {/* Subtle windows using mask or small rects */}
-          <g fill="var(--color-primary)" className="opacity-40">
-            <rect x="20" y="180" width="10" height="10" />
-            <rect x="40" y="180" width="10" height="10" />
-            <rect x="110" y="120" width="8" height="8" />
-            <rect x="290" y="70" width="12" height="12" />
-            <rect x="620" y="160" width="10" height="10" />
-            <rect x="700" y="60" width="8" height="8" />
-            <rect x="1050" y="150" width="10" height="10" />
+          {/* Subtle windows with staggered flicker */}
+          <g fill="var(--color-primary)">
+            <rect x="20" y="180" width="10" height="10" className="animate-window-flicker" />
+            <rect x="40" y="180" width="10" height="10" className="animate-window-flicker [animation-delay:-2s]" />
+            <rect x="110" y="120" width="8" height="8" className="animate-window-flicker [animation-delay:-5s]" />
+            <rect x="290" y="70" width="12" height="12" className="animate-window-flicker [animation-delay:-1s]" />
+            <rect x="620" y="160" width="10" height="10" className="animate-window-flicker [animation-delay:-6s]" />
+            <rect x="700" y="60" width="8" height="8" className="animate-window-flicker [animation-delay:-3s]" />
+            <rect x="1050" y="150" width="10" height="10" className="animate-window-flicker [animation-delay:-7s]" />
           </g>
         </svg>
       </div>

@@ -61,7 +61,7 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
           <p className="text-[1rem] font-normal text-on-surface-variant leading-relaxed">
             Paste your JSON data below. The format should be an array of objects.
           </p>
-          <div className="bg-[#131313]/80 rounded-[0.5rem] p-4 border border-outline-variant/15 overflow-x-auto text-[0.75rem] font-mono text-primary/80">
+          <div className="bg-background/80 rounded-[0.5rem] p-4 border border-outline-variant/15 overflow-x-auto text-[0.75rem] font-mono text-primary/80">
             <code>{'[{"date": "2024-03-15", "category": "food", "amount": 150}]'}</code>
           </div>
         </div>
