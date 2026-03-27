@@ -19,7 +19,11 @@ export function isDevMode(): boolean {
  * Gets the query string from the URL.
  * @returns URLSearchParams object.
  */
-const getQueryString = (urlWithQS: string = window.location.search) => {
-  return new URLSearchParams(urlWithQS);
+const getQueryString = () => {
+  // With HashRouter, query params live inside the hash fragment (e.g. /#/list?devMode=true)
+  const hash = window.location.hash;
+  const queryIndex = hash.indexOf('?');
+  const search = queryIndex !== -1 ? hash.substring(queryIndex) : '';
+  return new URLSearchParams(search);
 };
 

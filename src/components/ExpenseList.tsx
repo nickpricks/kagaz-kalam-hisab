@@ -126,8 +126,8 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
           <div className="h-1.5 w-1.5 rounded-full bg-primary-container animate-[pulse_2s_ease-in-out_infinite]" />
           <p className="text-on-surface-variant text-xs font-medium uppercase tracking-[0.05em]">Total Balance</p>
         </div>
-        <div className="text-[3.5rem] leading-none font-semibold tracking-tight text-on-surface flex items-baseline gap-1">
-          <span className="text-primary-container/80 text-3xl font-normal">{CONFIG.CURRENCY_SYMBOL}</span>
+        <div className="text-[3.5rem] leading-none font-display tracking-tight text-on-surface flex items-baseline gap-1">
+          <span className="text-primary-container/80 text-3xl font-sans font-normal">{CONFIG.CURRENCY_SYMBOL}</span>
           {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </div>
       </div>
@@ -200,8 +200,22 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
 
       {
         sortedDates.length === 0 &&
-        <div className="glass-card p-12 text-center">
-          <p className="text-on-surface-variant font-medium tracking-wide">No matching hisab found.</p>
+        <div className="glass-card p-12 flex flex-col items-center gap-6 animate-fade-in">
+          {/* Dimmed lantern icon */}
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="opacity-20">
+            <rect x="24" y="8" width="16" height="4" rx="2" fill="var(--color-on-surface)" />
+            <rect x="28" y="4" width="8" height="4" rx="1" fill="var(--color-on-surface)" />
+            <path d="M20 12h24v8c0 2-2 4-4 4H24c-2 0-4-2-4-4V12z" fill="var(--color-on-surface)" />
+            <path d="M22 24h20v24c0 2-2 4-4 4H26c-2 0-4-2-4-4V24z" fill="var(--color-surface-container-high)" stroke="var(--color-on-surface)" strokeWidth="1" />
+            <ellipse cx="32" cy="38" rx="4" ry="6" fill="var(--color-primary-container)" className="opacity-30" />
+            <line x1="32" y1="34" x2="32" y2="30" stroke="var(--color-primary-container)" strokeWidth="1" className="opacity-40" />
+            <rect x="26" y="52" width="12" height="4" rx="2" fill="var(--color-on-surface)" />
+            <rect x="28" y="56" width="8" height="3" rx="1.5" fill="var(--color-on-surface)" />
+          </svg>
+          <div className="space-y-2 text-center">
+            <p className="text-on-surface-variant font-medium tracking-wide">No matching hisab found.</p>
+            <p className="text-on-surface-variant/50 text-xs tracking-[0.05em]">The lantern sees nothing here.</p>
+          </div>
         </div>
       }
 
@@ -209,7 +223,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
         {
           sortedDates.map((date) => (
             <div key={date} className="relative">
-              <div className="sticky top-[72px] z-10 py-3 bg-[#131313]/90 backdrop-blur-xl -mx-4 px-4 flex justify-between items-center mb-6">
+              <div className="sticky top-[72px] z-10 py-3 bg-background/90 backdrop-blur-xl -mx-4 px-4 flex justify-between items-center mb-6">
                 <span className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant">
                   {new Date(date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                 </span>

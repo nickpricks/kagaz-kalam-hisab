@@ -113,8 +113,8 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                   type="button"
                   className={`py-3 px-2 rounded-[0.5rem] text-[0.75rem] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
                     ${category === cat.id 
-                      ? 'bg-primary-container/20 text-primary-container border-primary-container/40 shadow-[0_0_20px_rgba(255,193,7,0.4)] scale-[0.98]' 
-                      : 'bg-[#131313]/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface active:scale-95 active:shadow-[0_0_15px_rgba(255,193,7,0.3)]'
+                      ? 'bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-medium scale-[0.98]'
+                      : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface active:scale-95 active:shadow-glow-primary-subtle'
                     }`}
                   onClick={() => {
                     setCategory(cat.id);
@@ -141,7 +141,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                       className={`py-2 px-4 rounded-full text-[10.5px] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
                         ${subCat === sc 
                           ? 'bg-secondary/20 text-secondary border-secondary/40' 
-                          : 'bg-[#131313]/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface'
+                          : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface'
                         }`}
                       onClick={() => setSubCat(sc)}
                     >
@@ -164,7 +164,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
-              className="w-full bg-transparent text-[3.5rem] font-semibold tracking-tight text-on-surface text-right border-none focus:ring-0 placeholder:text-on-surface/10 selection:bg-primary-container/30"
+              className="w-full bg-transparent text-[3.5rem] font-display tracking-tight text-on-surface text-right border-none focus:ring-0 placeholder:text-on-surface/10 selection:bg-primary-container/30"
               required
               step="any"
               min="0.01"
@@ -177,7 +177,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                     type="button"
                     className={`py-2 flex items-center justify-center rounded-[0.5rem] text-[0.75rem] font-medium tracking-[0.05em] transition-all duration-300 border
                       ${activeAmountPreset === p 
-                        ? 'bg-primary-container/40 text-primary-container border-primary-container/50 shadow-[0_0_20px_rgba(255,193,7,0.6)] scale-[0.95]'
+                        ? 'bg-primary-container/40 text-primary-container border-primary-container/50 shadow-glow-primary-intense scale-[0.95]'
                         : 'bg-surface-container-high/40 text-on-surface-variant border-outline-variant/15 hover:border-primary-container/30 hover:text-primary-container active:scale-95'
                       }`}
                     onClick={() => handleAddAmount(p)}

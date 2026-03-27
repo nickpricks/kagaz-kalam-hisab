@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppRoutes } from './constants/AppRoutes';
 import { Header } from './components/Header';
 import { BackgroundEffects } from './components/BackgroundEffects';
@@ -23,6 +23,7 @@ import { About } from './components/About';
 export const App: React.FC = () => {
   const [expenses, setExpenses] = React.useState(getExpenses());
   const devModeActive = isDevMode();
+  const location = useLocation();
 
   /**
    * Refreshes the expense list from store.
@@ -43,13 +44,15 @@ export const App: React.FC = () => {
         <Header />
 
         <main className="flex-1 px-4 py-6 pb-24">
-          <Routes>
-            <Route path={AppRoutes.ADD} element={<AddEntry onExpenseAdded={refreshExpenses} />} />
-            <Route path={AppRoutes.LIST} element={<ExpenseList expenses={expenses} onExpenseDeleted={refreshExpenses} />} />
-            <Route path={AppRoutes.IMPORT} element={<BulkImport onImportSuccess={refreshExpenses} />} />
-            <Route path={AppRoutes.ABOUT} element={<About />} />
-            <Route path="/" element={<Navigate to={AppRoutes.LIST} replace />} />
-          </Routes>
+          <div key={location.pathname} className="animate-page-enter">
+            <Routes location={location}>
+              <Route path={AppRoutes.ADD} element={<AddEntry onExpenseAdded={refreshExpenses} />} />
+              <Route path={AppRoutes.LIST} element={<ExpenseList expenses={expenses} onExpenseDeleted={refreshExpenses} />} />
+              <Route path={AppRoutes.IMPORT} element={<BulkImport onImportSuccess={refreshExpenses} />} />
+              <Route path={AppRoutes.ABOUT} element={<About />} />
+              <Route path="/" element={<Navigate to={AppRoutes.LIST} replace />} />
+            </Routes>
+          </div>
         </main>
 
         {

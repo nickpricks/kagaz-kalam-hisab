@@ -13,8 +13,20 @@ import { capFirstLetter } from '../helpers/stings';
  * Header component for the application.
  */
 export const Header: React.FC = () => {
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50 bg-[#131313]/80 backdrop-blur-3xl px-4 py-4 pt-6">
+    <header className={`sticky top-0 z-50 backdrop-blur-3xl px-4 py-4 pt-6 transition-[background-color,box-shadow] duration-500 ${
+      scrolled
+        ? 'bg-background/95 shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
+        : 'bg-background/80 shadow-none'
+    }`}>
       <div className="flex justify-between items-center max-w-lg mx-auto w-full">
         <h1 className="text-base font-semibold tracking-[0.1em] text-primary-container uppercase">
           {CONFIG.APP_NAME}
