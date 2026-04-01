@@ -6,6 +6,7 @@
 import React from 'react';
 import { CATEGORIES, getSubCategories } from '../data/categories';
 import { addExpense } from '../data/store';
+import { toLocalDateString } from '../helpers/dateUtils';
 
 interface AddEntryProps {
   onExpenseAdded: () => void;
@@ -16,12 +17,13 @@ interface AddEntryProps {
  * @param props - Component props.
  */
 export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
-  const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = React.useState(toLocalDateString(new Date()));
   const [category, setCategory] = React.useState('');
   const [subCat, setSubCat] = React.useState('');
   const [amount, setAmount] = React.useState('');
   const [note, setNote] = React.useState('');
   const [activeAmountPreset, setActiveAmountPreset] = React.useState<number | null>(null);
+  const [validationError, setValidationError] = React.useState('');
 
   const amountPresets = [10, 20, 50, 100, 200, 500];
 
@@ -30,15 +32,24 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
    */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!category || !amount || parseFloat(amount) <= 0) return;
+    if (!category || !amount || parseFloat(amount) <= 0) {
+      setValidationError('Please select a category and enter a valid amount.');
+      setTimeout(() => setValidationError(''), 3000);
+      return;
+    }
 
-    addExpense({
+    const { saved } = addExpense({
       date,
       category,
       subCat,
       amount: parseFloat(amount),
       note,
     });
+
+    if (!saved) {
+      setValidationError('Expense recorded but may not persist \u2014 storage is full.');
+      setTimeout(() => setValidationError(''), 5000);
+    }
 
     handleReset();
     props.onExpenseAdded();
@@ -52,6 +63,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     setSubCat('');
     setAmount('');
     setNote('');
+    setValidationError('');
   };
 
   /**
@@ -62,7 +74,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     const current = parseFloat(amount) || 0;
     const newVal = (current + val).toFixed(2);
     setAmount(newVal);
-    
+
     // Bubble glow effect
     setActiveAmountPreset(val);
     setTimeout(() => setActiveAmountPreset(null), 750);
@@ -78,9 +90,9 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
           <h2 className="text-[1.75rem] font-medium tracking-tight text-on-surface">Add Entry</h2>
           <p className="text-on-surface-variant text-[0.75rem] font-medium uppercase tracking-[0.05em] mt-1">New Transaction</p>
         </div>
-        <button 
+        <button
           className="p-2 rounded-full text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high transition-colors active:scale-95"
-          onClick={handleReset} 
+          onClick={handleReset}
           title="Reset Form"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,13 +124,14 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                   key={cat.id}
                   type="button"
                   className={`py-3 px-2 rounded-[0.5rem] text-[0.75rem] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
-                    ${category === cat.id 
+                    ${category === cat.id
                       ? 'bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-medium scale-[0.98]'
                       : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface active:scale-95 active:shadow-glow-primary-subtle'
                     }`}
                   onClick={() => {
                     setCategory(cat.id);
-                    setSubCat(''); 
+                    setSubCat('');
+                    setValidationError('');
                   }}
                 >
                   {cat.label}
@@ -139,8 +152,8 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                       key={sc}
                       type="button"
                       className={`py-2 px-4 rounded-full text-[10.5px] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
-                        ${subCat === sc 
-                          ? 'bg-secondary/20 text-secondary border-secondary/40' 
+                        ${subCat === sc
+                          ? 'bg-secondary/20 text-secondary border-secondary/40'
                           : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface'
                         }`}
                       onClick={() => setSubCat(sc)}
@@ -156,13 +169,13 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
 
         <div className="space-y-3">
           <label className="text-[0.75rem] font-medium uppercase tracking-[0.05em] text-on-surface-variant ml-1">
-            Amount (₹) <span className="text-primary-container italic">*</span>
+            Amount (\u20B9) <span className="text-primary-container italic">*</span>
           </label>
           <div className="space-y-4">
             <input
               type="number"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => { setAmount(e.target.value); setValidationError(''); }}
               placeholder="0.00"
               className="w-full bg-transparent text-[3.5rem] font-display tracking-tight text-on-surface text-right border-none focus:ring-0 placeholder:text-on-surface/10 selection:bg-primary-container/30"
               required
@@ -176,7 +189,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                     key={p}
                     type="button"
                     className={`py-2 flex items-center justify-center rounded-[0.5rem] text-[0.75rem] font-medium tracking-[0.05em] transition-all duration-300 border
-                      ${activeAmountPreset === p 
+                      ${activeAmountPreset === p
                         ? 'bg-primary-container/40 text-primary-container border-primary-container/50 shadow-glow-primary-intense scale-[0.95]'
                         : 'bg-surface-container-high/40 text-on-surface-variant border-outline-variant/15 hover:border-primary-container/30 hover:text-primary-container active:scale-95'
                       }`}
@@ -201,9 +214,15 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
           />
         </div>
 
-        <button 
-          type="submit" 
-          className="btn-primary w-full mt-4" 
+        {validationError && (
+          <div className="p-3 rounded-xl text-xs font-bold border bg-red-500/10 border-red-500/30 text-red-500 animate-fade-in">
+            {validationError}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          className="btn-primary w-full mt-4"
           disabled={!isFormValid}
         >
           Save Hisab
@@ -212,5 +231,3 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     </div>
   );
 };
-
-export default AddEntry;

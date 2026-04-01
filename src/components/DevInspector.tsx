@@ -6,7 +6,7 @@
 import React from 'react';
 
 interface DevInspectorProps {
-  data: any;
+  data: unknown;
   label?: string;
 }
 
