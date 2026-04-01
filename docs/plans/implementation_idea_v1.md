@@ -8,6 +8,7 @@ This document serves as the project's living roadmap and finalized implementatio
 
 ### [ ] Phase 1.9: Before we begin Cloud Sync etc
 - [ ] **Clean Up**: Mechanism to remove local storage data. We can confirm user - wheather to copy to cloud or remove it and reset progress.
+- [ ] 
 ### [ ] Phase 2: Cloud Sync (Supabase)
 - [ ] **Infrastructure**: Set up Supabase project.
 - [ ] **Authentication**: Implement User Login (Google/Email) to protect data.
