@@ -7,13 +7,16 @@
  * Saves a value to localStorage.
  * @param key - The key to store the value under.
  * @param value - The value to store (will be JSON stringified).
+ * @returns true if saved successfully, false on failure (quota exceeded, security error, etc.).
  */
-export function saveToStorage<T>(key: string, value: T): void {
+export function saveToStorage<T>(key: string, value: T): boolean {
   try {
     const serializedValue = JSON.stringify(value);
     window.localStorage.setItem(key, serializedValue);
+    return true;
   } catch (error) {
     console.error(`Error saving to localStorage [${key}]:`, error);
+    return false;
   }
 }
 

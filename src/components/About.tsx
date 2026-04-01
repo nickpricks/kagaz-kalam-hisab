@@ -50,7 +50,7 @@ export const About: React.FC = () => {
         <div className="pt-6 border-t border-outline/20 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4">
             <div className="px-3 py-1 bg-surface-container rounded-full border border-outline/20 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-              v0.0.1
+              v{CONFIG.VERSION}
             </div>
           </div>
           <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
@@ -62,5 +62,3 @@ export const About: React.FC = () => {
     </div>
   );
 };
-
-export default About;

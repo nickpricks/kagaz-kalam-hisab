@@ -1,3 +1,8 @@
+/**
+ * @file BackgroundEffects.tsx
+ * @description Atmospheric background effects for the Obsidian Lantern theme.
+ */
+
 import React from 'react';
 
 export const BackgroundEffects: React.FC = () => {

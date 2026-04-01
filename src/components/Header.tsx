@@ -7,7 +7,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { AppRoutes, type AppRoute } from '../constants/AppRoutes';
 import { CONFIG } from '../constants/Config';
-import { capFirstLetter } from '../helpers/stings';
+import { capFirstLetter } from '../helpers/strings';
 
 /**
  * Header component for the application.
