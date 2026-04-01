@@ -26,23 +26,19 @@ export function validateImportData(data: unknown): { isValid: boolean; error?: s
       };
     }
 
-    const date = item.date as string;
-    const category = item.category as string;
-    const amount = item.amount;
-
     // Validate date format (YYYY-MM-DD) and semantic validity
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
       return {
         isValid: false,
         error: `Item at index ${i} has an invalid date format (expected YYYY-MM-DD).`
       };
     }
-    const [y, m, d] = date.split('-').map(Number);
+    const [y, m, d] = item.date.split('-').map(Number);
     const parsed = new Date(y, m - 1, d);
     if (parsed.getFullYear() !== y || parsed.getMonth() !== m - 1 || parsed.getDate() !== d) {
       return {
         isValid: false,
-        error: `Item at index ${i} has an invalid date: "${date}".`
+        error: `Item at index ${i} has an invalid date: "${item.date}".`
       };
     }
 
