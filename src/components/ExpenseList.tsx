@@ -6,8 +6,9 @@
 import React from 'react';
 import type { Expense } from '../data/types';
 import { CATEGORIES } from '../data/categories';
-import { deleteExpense } from '../data/store';
+import { deleteExpense, insertExpense } from '../data/store';
 import { CONFIG } from '../constants/Config';
+import { toLocalDateString } from '../helpers/dateUtils';
 
 import { useNavigate } from 'react-router-dom';
 import { isDevMode } from '../helpers/navigation';
@@ -18,6 +19,8 @@ interface ExpenseListProps {
   onExpenseDeleted: () => void;
 }
 
+const UNDO_TIMEOUT_MS = 5000;
+
 /**
  * View component for listing expenses.
  * @param props - Component props.
@@ -25,90 +28,124 @@ interface ExpenseListProps {
 export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [dateFilter, setDateFilter] = React.useState('all'); // all, today, current_week, current_month, etc.
+  const [dateFilter, setDateFilter] = React.useState('all');
   const [customDateRange, setCustomDateRange] = React.useState({ start: '', end: '' });
   const [categoryFilter, setCategoryFilter] = React.useState('all');
+  const [undoExpense, setUndoExpense] = React.useState<Expense | null>(null);
+  const undoTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const devMode = isDevMode();
 
+  // Clear undo timer on unmount
+  React.useEffect(() => {
+    return () => {
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    };
+  }, []);
+
   /**
-   * Handles deletion of an expense.
+   * Handles deletion with undo toast.
    * @param id - The ID of the expense to delete.
    */
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this hisab?')) {
-      deleteExpense(id);
-      props.onExpenseDeleted();
-    }
+    const removed = deleteExpense(id);
+    if (!removed) return;
+
+    // Clear any previous undo timer
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+
+    setUndoExpense(removed);
+    props.onExpenseDeleted();
+
+    undoTimerRef.current = setTimeout(() => {
+      setUndoExpense(null);
+      undoTimerRef.current = null;
+    }, UNDO_TIMEOUT_MS);
+  };
+
+  /**
+   * Restores the most recently deleted expense.
+   */
+  const handleUndo = () => {
+    if (!undoExpense) return;
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    insertExpense(undoExpense);
+    setUndoExpense(null);
+    undoTimerRef.current = null;
+    props.onExpenseDeleted(); // refresh list
   };
 
   /**
    * Filters expenses based on current criteria.
+   * All date comparisons use YYYY-MM-DD strings to avoid UTC/local timezone mismatch.
    */
-  const filteredExpenses = props.expenses.filter((e) => {
-    // Search filter
-    const matchesSearch = e.note.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (CATEGORIES[e.category]?.label || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-    // Category filter
-    const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
-
-    // Date filter
-    let matchesDate = true;
-    const expenseDate = new Date(e.date);
+  const filteredExpenses = React.useMemo(() => {
     const now = new Date();
-    now.setHours(0, 0, 0, 0);
+    const todayStr = toLocalDateString(now);
 
-    if (dateFilter === 'today') {
-      const todayStr = now.toISOString().split('T')[0];
-      matchesDate = e.date === todayStr;
-    } else if (dateFilter === 'current_week') {
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      matchesDate = expenseDate >= startOfWeek;
-    } else if (dateFilter === 'current_month') {
-      matchesDate = expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear();
-    } else if (dateFilter === 'last_12_months') {
-      const twelveMonthsAgo = new Date(now);
-      twelveMonthsAgo.setMonth(now.getMonth() - 12);
-      matchesDate = expenseDate >= twelveMonthsAgo;
-    } else if (dateFilter === 'current_fy') {
-      // Indian Financial Year: April 1 (month index 3) to March 31
-      const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
-      matchesDate = expenseDate >= new Date(fyStartYear, 3, 1) && expenseDate <= new Date(fyStartYear + 1, 2, 31);
-    } else if (dateFilter === 'last_fy') {
-      const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() - 1 : now.getFullYear() - 2;
-      matchesDate = expenseDate >= new Date(fyStartYear, 3, 1) && expenseDate <= new Date(fyStartYear + 1, 2, 31);
-    } else if (dateFilter === 'custom') {
-      const fromStr = customDateRange.start;
-      const toStr = customDateRange.end;
-      const expenseDateOnly = new Date(expenseDate);
-      expenseDateOnly.setHours(0,0,0,0);
-      
-      const from = fromStr ? new Date(fromStr) : new Date(0);
-      from.setHours(0,0,0,0);
-      const to = toStr ? new Date(toStr) : new Date(8640000000000000);
-      to.setHours(23,59,59,999);
-      
-      matchesDate = expenseDateOnly >= from && expenseDateOnly <= to;
-    }
+    return props.expenses.filter((e) => {
+      // Search filter
+      const matchesSearch = e.note.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (CATEGORIES[e.category]?.label || '').toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch && matchesCategory && matchesDate;
-  });
+      // Category filter
+      const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
+
+      // Date filter — all comparisons as YYYY-MM-DD strings
+      let matchesDate = true;
+
+      if (dateFilter === 'today') {
+        matchesDate = e.date === todayStr;
+      } else if (dateFilter === 'current_week') {
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        matchesDate = e.date >= toLocalDateString(startOfWeek);
+      } else if (dateFilter === 'current_month') {
+        const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+        matchesDate = e.date >= monthStart && e.date <= todayStr;
+      } else if (dateFilter === 'last_12_months') {
+        const twelveAgo = new Date(now);
+        twelveAgo.setMonth(now.getMonth() - 12);
+        matchesDate = e.date >= toLocalDateString(twelveAgo);
+      } else if (dateFilter === 'current_fy') {
+        // Indian Financial Year: April 1 (month index 3) to March 31
+        const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+        const fyStart = `${fyStartYear}-04-01`;
+        const fyEnd = `${fyStartYear + 1}-03-31`;
+        matchesDate = e.date >= fyStart && e.date <= fyEnd;
+      } else if (dateFilter === 'last_fy') {
+        const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() - 1 : now.getFullYear() - 2;
+        const fyStart = `${fyStartYear}-04-01`;
+        const fyEnd = `${fyStartYear + 1}-03-31`;
+        matchesDate = e.date >= fyStart && e.date <= fyEnd;
+      } else if (dateFilter === 'custom') {
+        const from = customDateRange.start || '0000-00-00';
+        const to = customDateRange.end || '9999-99-99';
+        matchesDate = e.date >= from && e.date <= to;
+      }
+
+      return matchesSearch && matchesCategory && matchesDate;
+    });
+  }, [props.expenses, searchTerm, categoryFilter, dateFilter, customDateRange]);
 
   /**
-   * Groups filtered expenses by date.
+   * Groups filtered expenses by date and computes derived values.
    */
-  const groupedExpenses = filteredExpenses.reduce((groups: Record<string, Expense[]>, expense) => {
-    const date = expense.date;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(expense);
-    return groups;
-  }, {});
+  const { groupedExpenses, sortedDates, grandTotal } = React.useMemo(() => {
+    const grouped = filteredExpenses.reduce((groups: Record<string, Expense[]>, expense) => {
+      const date = expense.date;
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(expense);
+      return groups;
+    }, {});
 
-  // Sort dates descending
-  const sortedDates = Object.keys(groupedExpenses).sort((a, b) => b.localeCompare(a));
+    return {
+      groupedExpenses: grouped,
+      sortedDates: Object.keys(grouped).sort((a, b) => b.localeCompare(a)),
+      grandTotal: filteredExpenses.reduce((sum, e) => sum + e.amount, 0),
+    };
+  }, [filteredExpenses]);
 
   /**
    * Calculates total for a group of expenses.
@@ -116,8 +153,6 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
   const calculateTotal = (expenses: Expense[]) => {
     return expenses.reduce((sum, e) => sum + e.amount, 0);
   };
-
-  const grandTotal = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div className="space-y-12">
@@ -147,9 +182,9 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
           </svg>
         </div>
         <div className="flex flex-wrap gap-3">
-          <select 
+          <select
             className="input-field py-2 text-sm appearance-none cursor-pointer flex-1 min-w-[140px]"
-            value={dateFilter} 
+            value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
           >
             <option value="all">All Dates</option>
@@ -161,9 +196,9 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
             <option value="last_fy">Last Fin Year</option>
             <option value="custom">Custom Range</option>
           </select>
-          <select 
+          <select
             className="input-field py-2 text-sm appearance-none cursor-pointer flex-1 min-w-[140px]"
-            value={categoryFilter} 
+            value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
             <option value="all">All Categories</option>
@@ -174,25 +209,25 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
             }
           </select>
         </div>
-        
+
         {dateFilter === 'custom' && (
           <div className="flex gap-3 animate-fade-in pt-2 border-t border-outline-variant/15 mt-2">
             <div className="flex-1 space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">From</label>
-              <input 
-                type="date" 
-                className="input-field py-2 text-sm text-on-surface-variant" 
-                value={customDateRange.start} 
-                onChange={e => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))} 
+              <input
+                type="date"
+                className="input-field py-2 text-sm text-on-surface-variant"
+                value={customDateRange.start}
+                onChange={e => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))}
               />
             </div>
             <div className="flex-1 space-y-1">
               <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">To</label>
-              <input 
-                type="date" 
-                className="input-field py-2 text-sm text-on-surface-variant" 
-                value={customDateRange.end} 
-                onChange={e => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))} 
+              <input
+                type="date"
+                className="input-field py-2 text-sm text-on-surface-variant"
+                value={customDateRange.end}
+                onChange={e => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))}
               />
             </div>
           </div>
@@ -226,7 +261,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
             <div key={date} className="relative">
               <div className="sticky top-[72px] z-10 py-3 bg-background/90 backdrop-blur-xl -mx-4 px-4 flex justify-between items-center mb-6">
                 <span className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant">
-                  {new Date(date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                  {new Date(date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                 </span>
                 <span className="text-xs font-semibold text-on-surface-variant/80">
                   {CONFIG.CURRENCY_SYMBOL}{calculateTotal(groupedExpenses[date]).toFixed(2)}
@@ -285,8 +320,21 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
           ))
         }
       </div>
+
+      {/* Undo Toast */}
+      {undoExpense && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass-panel px-5 py-3 flex items-center gap-4 animate-fade-in shadow-glow-primary-subtle">
+          <span className="text-sm text-on-surface">
+            Dropped {CATEGORIES[undoExpense.category]?.label || undoExpense.category} {CONFIG.CURRENCY_SYMBOL}{undoExpense.amount.toFixed(2)}
+          </span>
+          <button
+            className="text-sm font-bold uppercase tracking-[0.05em] text-primary-container hover:text-primary transition-colors"
+            onClick={handleUndo}
+          >
+            Undo
+          </button>
+        </div>
+      )}
     </div>
   );
 };
-
-export default ExpenseList;
