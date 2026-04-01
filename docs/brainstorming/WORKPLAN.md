@@ -13,7 +13,7 @@
     - [x] Implement glassmorphism, glows, and custom colors.
 3. [x] GitHub Deployment Fix
     - [x] Review `.github/workflows/deploy.yml`.
-    - [x] Provided [deployment_fix.md](file:///C:/Users/nites/.gemini/antigravity/brain/133492e1-6430-4250-9eb5-5372c2e6bbbe/deployment_fix.md) guide.
+    - [x] Provided deployment fix guide.
 4. [x] Cleanup & Documentation
     - [x] Update documentation to reflect Tailwind usage.
     - [x] Final verification and walkthrough.

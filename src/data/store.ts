@@ -99,7 +99,9 @@ export function deleteExpense(id: string): Expense | null {
 
 /**
  * Inserts an expense back into storage (used for undo).
+ * Coerces missing/invalid fields to defaults rather than rejecting them.
  * @param expense - The full expense object to restore.
+ * Callers should use validateImportData() first if strict validation is needed.
  */
 export function insertExpense(expense: Expense): void {
   const allExpenses = getAllExpensesRaw();
