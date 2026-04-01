@@ -71,6 +71,28 @@ describe("Validation Logic", () => {
     expect(result.isValid).toBe(false);
   });
 
+  it("should fail on semantically invalid date (Feb 30)", () => {
+    const result = validateImportData([{ date: "2024-02-30", category: "food", amount: 100 }]);
+    expect(result.isValid).toBe(false);
+    expect(result.error).toContain("invalid date");
+  });
+
+  it("should fail on semantically invalid date (month 13)", () => {
+    const result = validateImportData([{ date: "2024-13-01", category: "food", amount: 100 }]);
+    expect(result.isValid).toBe(false);
+    expect(result.error).toContain("invalid date");
+  });
+
+  it("should accept a valid leap year date", () => {
+    const result = validateImportData([{ date: "2024-02-29", category: "food", amount: 100 }]);
+    expect(result.isValid).toBe(true);
+  });
+
+  it("should fail on Feb 29 in non-leap year", () => {
+    const result = validateImportData([{ date: "2023-02-29", category: "food", amount: 100 }]);
+    expect(result.isValid).toBe(false);
+  });
+
   // Category
   it("should fail on unknown category", () => {
     const result = validateImportData([{ date: "2024-03-16", category: "unknown", amount: 100 }]);

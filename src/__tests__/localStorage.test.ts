@@ -19,7 +19,8 @@ describe("localStorage Utilities", () => {
 
   describe("saveToStorage", () => {
     it("should save and retrieve a string", () => {
-      saveToStorage("key", "hello");
+      const result = saveToStorage("key", "hello");
+      expect(result).toBe(true);
       expect(storage["key"]).toBe('"hello"');
     });
 
@@ -39,7 +40,7 @@ describe("localStorage Utilities", () => {
       expect(JSON.parse(storage["key"])).toBe("second");
     });
 
-    it("should not throw on save failure", () => {
+    it("should return false on save failure", () => {
       const brokenWindow = {
         localStorage: {
           getItem: () => null,
@@ -47,7 +48,8 @@ describe("localStorage Utilities", () => {
         }
       };
       Object.defineProperty(globalThis, 'window', { value: brokenWindow, writable: true, configurable: true });
-      expect(() => saveToStorage("key", "value")).not.toThrow();
+      const result = saveToStorage("key", "value");
+      expect(result).toBe(false);
     });
   });
 

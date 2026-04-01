@@ -3,4 +3,4 @@
 
 | File / Folder | Description |
 | :--- | :--- |
-| [implementation_plan_v1.md](docs/plans/implementation_plan_v1.md) | Implementation Plan for Idea V1 |
+| [implementation_idea_v1.md](implementation_idea_v1.md) | Implementation Plan for Idea V1 |

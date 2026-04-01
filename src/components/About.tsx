@@ -62,5 +62,3 @@ export const About: React.FC = () => {
     </div>
   );
 };
-
-export default About;

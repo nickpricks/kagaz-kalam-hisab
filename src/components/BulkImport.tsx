@@ -5,8 +5,12 @@
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { importExpensesFromJSON } from '../data/store';
+import { importExpenses } from '../data/store';
 import { validateImportData } from '../utils/validation';
+import type { Expense } from '../data/types';
+
+const MAX_INPUT_SIZE = 1_000_000; // 1MB
+const MAX_ENTRY_COUNT = 5000;
 
 interface BulkImportProps {
   onImportSuccess: () => void;
@@ -28,32 +32,64 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
   }, [location.state]);
 
   /**
-   * Handles the import process.
+   * Handles the import process: parse → validate → import.
    */
   const handleImport = () => {
     if (!jsonInput.trim()) return;
 
+    if (jsonInput.length > MAX_INPUT_SIZE) {
+      setStatus({ message: `Input too large (${(jsonInput.length / 1_000_000).toFixed(1)}MB). Maximum is 1MB.`, isError: true });
+      return;
+    }
+
     try {
       const parsed = JSON.parse(jsonInput);
-      const validation = validateImportData(parsed);
 
+      if (!Array.isArray(parsed)) {
+        setStatus({ message: 'Data must be an array of objects.', isError: true });
+        return;
+      }
+
+      if (parsed.length > MAX_ENTRY_COUNT) {
+        setStatus({ message: `Too many entries (${parsed.length}). Maximum is ${MAX_ENTRY_COUNT}.`, isError: true });
+        return;
+      }
+
+      const validation = validateImportData(parsed);
       if (!validation.isValid) {
         setStatus({ message: `Validation failed: ${validation.error}`, isError: true });
         return;
       }
 
-      const result = importExpensesFromJSON(jsonInput);
+      // Build validated Expense objects from parsed data
+      const now = new Date().toISOString();
+      const entries: Expense[] = parsed.map((item: Record<string, unknown>) => ({
+        id: (typeof item.id === 'string' && item.id) ? item.id : crypto.randomUUID(),
+        date: item.date as string,
+        category: item.category as string,
+        subCat: (typeof item.subCat === 'string') ? item.subCat : '',
+        amount: item.amount as number,
+        note: (typeof item.note === 'string') ? item.note : '',
+        isDeleted: false,
+        createdAt: (typeof item.createdAt === 'string') ? item.createdAt : now,
+        updatedAt: (typeof item.updatedAt === 'string') ? item.updatedAt : now,
+      }));
+
+      const result = importExpenses(entries);
       if (result.success) {
-        setStatus({ message: `Successfully imported ${result.count} expenses!`, isError: false });
+        const parts = [`Successfully imported ${result.count} expenses!`];
+        if (result.skipped > 0) parts.push(`${result.skipped} duplicates skipped.`);
+        setStatus({ message: parts.join(' '), isError: false });
         setJsonInput('');
         props.onImportSuccess();
       } else {
-        setStatus({ message: `Import failed: ${result.error}`, isError: true });
+        setStatus({ message: 'Import failed: could not save to storage.', isError: true });
       }
-    } catch (e) {
+    } catch {
       setStatus({ message: 'Invalid JSON format. Please check your data.', isError: true });
     }
   };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-1">
@@ -84,11 +120,11 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
         {
           status &&
           <div className={`p-4 rounded-xl text-xs font-bold border transition-all animate-fade-in
-            ${status.isError 
-              ? 'bg-red-500/10 border-red-500/30 text-red-500' 
+            ${status.isError
+              ? 'bg-red-500/10 border-red-500/30 text-red-500'
               : 'bg-green-500/10 border-green-500/30 text-green-500'
             }`}>
-            {status.isError ? '⚠️ ' : '✅ '} {status.message}
+            {status.isError ? '\u26A0\uFE0F ' : '\u2705 '} {status.message}
           </div>
         }
 
@@ -103,5 +139,3 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
     </div>
   );
 };
-
-export default BulkImport;
