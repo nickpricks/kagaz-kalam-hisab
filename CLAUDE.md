@@ -13,7 +13,7 @@ bun run dev          # Dev server on port 3000
 bun run dev:host     # Dev server accessible on LAN
 bun run build        # TypeScript check + Vite production build
 bun run lint         # ESLint on all .ts/.tsx
-bun test             # Vitest (src/__tests__/)
+bun test             # Vitest (src/__tests__/) — prints console.error from error-handling tests; check "0 fail" not the red text
 bun run preview      # Preview production build
 ```
 
@@ -34,10 +34,10 @@ src/
 **Data flow**: Components call `store.ts` functions → store reads/writes `localStorage` via `utils/localStorage.ts` → data validated by `utils/validation.ts`.
 
 **Key patterns**:
-- Soft delete: expenses set `isDeleted: true`, never physically removed. `getExpenses()` filters these out.
+- Hard delete + undo toast (planned): `deleteExpense` physically removes records. Legacy soft-deleted records (`isDeleted: true`) still filtered by `getExpenses()`.
 - IDs via `crypto.randomUUID()`, timestamps as ISO 8601.
 - Dates stored as `YYYY-MM-DD` strings.
-- Path alias `@/` maps to project root (configured in vite.config.ts).
+- Storage key defined once in `CONFIG.STORAGE_KEYS.EXPENSES` — always import from there, never hardcode.
 
 ## Routing
 
@@ -59,8 +59,17 @@ Strict mode with `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSw
 
 ## Documentation
 
-Planning docs live in `docs/brainstorming/` (not `docs/brainstorm/`). `WORKPLAN.md` tracks phase progress. Update docs when making architectural changes.
+Planning docs live in `docs/brainstorming/` (not `docs/brainstorm/`). `docs/plans/implementation_idea_v1.md` tracks phase progress. Update docs when making architectural changes.
+
+## Reviews
+
+Review reports in `docs/reviews/`. `REVIEW_CONSOLIDATED.md` is the active issue tracker with concrete fix suggestions per finding. Check it before starting fix work.
 
 ## Commit Convention
 
 When requesting commit approval, include a concise summary of changes and list all modified/created files (git-status style).
+
+## Git Workflow
+
+- Always create a feature branch before editing source files — never edit directly on master.
+- Commit code changes and documentation changes separately.
