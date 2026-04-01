@@ -41,9 +41,6 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
-    define: {
-      'process.env.KEY': JSON.stringify(env.KEY),
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

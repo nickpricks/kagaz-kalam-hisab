@@ -72,6 +72,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
       twelveMonthsAgo.setMonth(now.getMonth() - 12);
       matchesDate = expenseDate >= twelveMonthsAgo;
     } else if (dateFilter === 'current_fy') {
+      // Indian Financial Year: April 1 (month index 3) to March 31
       const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
       matchesDate = expenseDate >= new Date(fyStartYear, 3, 1) && expenseDate <= new Date(fyStartYear + 1, 2, 31);
     } else if (dateFilter === 'last_fy') {

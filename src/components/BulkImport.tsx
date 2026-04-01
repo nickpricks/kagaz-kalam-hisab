@@ -1,3 +1,8 @@
+/**
+ * @file BulkImport.tsx
+ * @description View for bulk importing expenses from JSON data.
+ */
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { importExpensesFromJSON } from '../data/store';

@@ -5,8 +5,9 @@
 
 import type { Expense } from './types';
 import { getFromStorage, saveToStorage } from '../utils/localStorage';
+import { CONFIG } from '../constants/Config';
 
-const STORAGE_KEY = 'kagaz_kalam_expenses';
+const STORAGE_KEY = CONFIG.STORAGE_KEYS.EXPENSES;
 
 /**
  * Retrieves all expenses from storage, excluding soft-deleted ones.
@@ -26,7 +27,7 @@ export function getAllExpensesRaw(): Expense[] {
 
 /**
  * Adds a new expense to the store.
- * @param expense - Partial expense data (amount, category, etc.).
+ * @param expenseData - Required expense fields (date, category, subCat, amount, note). ID and timestamps are auto-generated.
  * @returns The newly created expense object.
  */
 export function addExpense(expenseData: Omit<Expense, 'id' | 'isDeleted' | 'createdAt' | 'updatedAt'>): Expense {
@@ -70,12 +71,13 @@ export function updateExpense(id: string, updates: Partial<Omit<Expense, 'id' | 
  * @param id - The ID of the expense to delete.
  */
 export function deleteExpense(id: string): void {
-  updateExpense(id, { isDeleted: true } as any);
+  updateExpense(id, { isDeleted: true });
 }
 
 /**
  * Bulk imports expenses from a JSON array.
- * Validates basic structure before saving.
+ * Coerces missing/invalid fields to defaults rather than rejecting them.
+ * Callers should use validateImportData() first if strict validation is needed.
  * @param jsonString - The JSON string representing an array of expenses.
  */
 export function importExpensesFromJSON(jsonString: string): { success: boolean; count: number; error?: string } {

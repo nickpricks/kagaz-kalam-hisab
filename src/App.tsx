@@ -9,8 +9,9 @@ import { AppRoutes } from './constants/AppRoutes';
 import { Header } from './components/Header';
 import { BackgroundEffects } from './components/BackgroundEffects';
 import { DevInspector } from './components/DevInspector';
-import { isDevMode } from './helpers/navigation'; // Keeping this for now for devMode check
+import { isDevMode } from './helpers/navigation';
 import { getExpenses } from './data/store';
+import { CONFIG } from './constants/Config';
 
 import { AddEntry } from './components/AddEntry';
 import { ExpenseList } from './components/ExpenseList';
@@ -59,7 +60,7 @@ export const App: React.FC = () => {
           devModeActive &&
           <div className="p-4">
             <DevInspector
-              data={{ expensesCount: expenses.length, localStorage: localStorage.getItem('kagaz_kalam_expenses') }}
+              data={{ expensesCount: expenses.length, localStorage: localStorage.getItem(CONFIG.STORAGE_KEYS.EXPENSES) }}
               label="App State"
             />
           </div>
