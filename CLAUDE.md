@@ -13,7 +13,7 @@ bun run dev          # Dev server on port 3000
 bun run dev:host     # Dev server accessible on LAN
 bun run build        # TypeScript check + Vite production build
 bun run lint         # ESLint on all .ts/.tsx
-bun run test         # Vitest (src/__tests__/) — prints console.error from error-handling tests; check "0 fail" not the red text
+bun run test         # Vitest via package.json script — DO NOT use `bun test` (Bun's native runner, bypasses vitest + jsdom config)
 bun run preview      # Preview production build
 ```
 
@@ -39,6 +39,8 @@ src/
 - IDs via `crypto.randomUUID()`, timestamps as ISO 8601.
 - Dates stored as `YYYY-MM-DD` strings.
 - Storage key defined once in `CONFIG.STORAGE_KEYS.EXPENSES` — always import from there, never hardcode.
+- All store write functions must propagate `saveToStorage`'s boolean return to callers — see `addExpense`/`updateExpense` as the pattern.
+- Router `location.state` is untyped at runtime — use a runtime validator before reading it. See `parseEditExpense()` in `AddEntry.tsx`.
 
 ## Routing
 
@@ -53,6 +55,10 @@ Tailwind CSS v4 via `@tailwindcss/vite` plugin. Custom theme in `src/index.css` 
 - Production base path: `/kagaz-kalam-hisab/` (GitHub Pages)
 - CI: GitHub Actions on push to `master` — install, test, build, deploy
 - PWA configured via `vite-plugin-pwa` with auto-update registration
+
+## Testing
+
+`bun run test` runs Vitest. Component tests (`.test.tsx`) use `@testing-library/react` + jsdom, configured via `test.environmentMatchGlobs` in `vite.config.ts`. Data-layer tests (`.test.ts`) mock `window` manually and run in the default node environment — the two environments must stay separate.
 
 ## TypeScript
 
