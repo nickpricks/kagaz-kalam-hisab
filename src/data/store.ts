@@ -65,22 +65,22 @@ export function addExpense(expenseData: Omit<Expense, 'id' | 'isDeleted' | 'crea
 /**
  * Updates an existing expense.
  * @param id - The ID of the expense to update.
- * @param updates - The fields to update.
- * @returns true if the expense was found and updated, false if ID not found.
+ * @param updates - Editable expense fields.
+ * @returns Object with `found` (ID exists) and `saved` (persisted to storage).
  */
-export function updateExpense(id: string, updates: Partial<Omit<Expense, 'id' | 'createdAt'>>): boolean {
+export function updateExpense(id: string, updates: Partial<Omit<Expense, 'id' | 'createdAt' | 'isDeleted' | 'updatedAt'>>): { found: boolean; saved: boolean } {
   const allExpenses = getAllExpensesRaw();
   const index = allExpenses.findIndex((e) => e.id === id);
 
-  if (index === -1) return false;
+  if (index === -1) return { found: false, saved: false };
 
   allExpenses[index] = {
     ...allExpenses[index],
     ...updates,
     updatedAt: new Date().toISOString(),
   };
-  saveToStorage(STORAGE_KEY, allExpenses);
-  return true;
+  const saved = saveToStorage(STORAGE_KEY, allExpenses);
+  return { found: true, saved };
 }
 
 /**

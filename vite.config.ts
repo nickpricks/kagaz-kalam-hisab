@@ -52,6 +52,11 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
+    test: {
+      environmentMatchGlobs: [
+        ['**/*.test.tsx', 'jsdom'],
+      ],
+    },
     server: {
       port: 3000,
     },

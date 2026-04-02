@@ -34,17 +34,25 @@ This document serves as the project's living roadmap and finalized implementatio
 
 ---
 
+### [x] Phase 1.8: Review Fixes & Architecture ✅
+- [x] **Edit Flow**: Inline edit via `/add` route with router state (replaces devMode editing).
+- [x] **Hard Delete**: `deleteExpense` physically removes records + undo toast (5s). Replaces soft-delete for new records.
+- [x] **Filters Hook**: `useExpenseFilters` custom hook extracted from ExpenseList (filter/group/sort with useMemo).
+- [x] **Component Tests**: ExpenseList tests with @testing-library/react + jsdom (6 tests).
+- [x] **Security**: Runtime validation on `location.state`, `updateExpense` returns `{found, saved}`, tightened type signature.
+- [x] **Data Integrity**: `saveToStorage` return value propagated through all store write paths. Date comparisons use local YYYY-MM-DD strings (no UTC bugs).
+
 ### [x] Phase 1.5: Plan V2 Refinements ✅
 - [x] **Add Flow**: Accumulating amounts, mandatory field validation, and form reset.
 - [x] **List Flow**: Full-text search and advanced date/category filters.
-- [x] **UX**: Standard Routing via `HashRouter` and `devMode` item editing.
-- [x] **Quality**: Unit tests (Bun) and JSON validation layer for imports.
+- [x] **UX**: Standard Routing via `HashRouter`, ErrorBoundary, schema versioning.
+- [x] **Quality**: Unit tests and JSON validation layer for imports.
 
 ### [x] Phase 1: Local Storage MVP ✅
 - [x] **Foundational**: Vite + React + TS scaffolding.
-- [x] **Persistence**: `localStorage` store with soft-delete support.
-- [x] **UI**: Dark-mode-first dashboard with day-wise totals.
-- [x] **Import**: Basic JSON bulk import capability.
+- [x] **Persistence**: `localStorage` store. Legacy soft-deleted records still filtered; new records use hard delete.
+- [x] **UI**: Dark-mode-first Obsidian Lantern theme with day-wise totals.
+- [x] **Import**: Bulk JSON import with validation, size limits, and deduplication.
 
 ---
 

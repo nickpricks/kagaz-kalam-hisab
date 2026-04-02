@@ -8,10 +8,9 @@ import type { Expense } from '../data/types';
 import { CATEGORIES } from '../data/categories';
 import { deleteExpense, insertExpense } from '../data/store';
 import { CONFIG } from '../constants/Config';
-import { toLocalDateString } from '../helpers/dateUtils';
+import { useExpenseFilters } from '../hooks/useExpenseFilters';
 
 import { useNavigate } from 'react-router-dom';
-import { isDevMode } from '../helpers/navigation';
 import { AppRoutes } from '../constants/AppRoutes';
 
 interface ExpenseListProps {
@@ -27,13 +26,16 @@ const UNDO_TIMEOUT_MS = 5000;
  */
 export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps) => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [dateFilter, setDateFilter] = React.useState('all');
-  const [customDateRange, setCustomDateRange] = React.useState({ start: '', end: '' });
-  const [categoryFilter, setCategoryFilter] = React.useState('all');
   const [undoExpense, setUndoExpense] = React.useState<Expense | null>(null);
   const undoTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const devMode = isDevMode();
+
+  const {
+    searchTerm, setSearchTerm,
+    dateFilter, setDateFilter,
+    customDateRange, setCustomDateRange,
+    categoryFilter, setCategoryFilter,
+    groupedExpenses, sortedDates, grandTotal,
+  } = useExpenseFilters(props.expenses);
 
   // Clear undo timer on unmount
   React.useEffect(() => {
@@ -74,82 +76,6 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
     props.onExpenseDeleted(); // refresh list
   };
 
-  /**
-   * Filters expenses based on current criteria.
-   * All date comparisons use YYYY-MM-DD strings to avoid UTC/local timezone mismatch.
-   */
-  const filteredExpenses = React.useMemo(() => {
-    const now = new Date();
-    const todayStr = toLocalDateString(now);
-
-    return props.expenses.filter((e) => {
-      // Search filter
-      const matchesSearch = e.note.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (CATEGORIES[e.category]?.label || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-      // Category filter
-      const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
-
-      // Date filter — all comparisons as YYYY-MM-DD strings
-      let matchesDate = true;
-
-      if (dateFilter === 'today') {
-        matchesDate = e.date === todayStr;
-      } else if (dateFilter === 'current_week') {
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        matchesDate = e.date >= toLocalDateString(startOfWeek);
-      } else if (dateFilter === 'current_month') {
-        const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-        matchesDate = e.date >= monthStart && e.date <= todayStr;
-      } else if (dateFilter === 'last_12_months') {
-        const twelveAgo = new Date(now);
-        twelveAgo.setMonth(now.getMonth() - 12);
-        matchesDate = e.date >= toLocalDateString(twelveAgo);
-      } else if (dateFilter === 'current_fy') {
-        // Indian Financial Year: April 1 (month index 3) to March 31
-        const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
-        const fyStart = `${fyStartYear}-04-01`;
-        const fyEnd = `${fyStartYear + 1}-03-31`;
-        matchesDate = e.date >= fyStart && e.date <= fyEnd;
-      } else if (dateFilter === 'last_fy') {
-        const fyStartYear = now.getMonth() >= 3 ? now.getFullYear() - 1 : now.getFullYear() - 2;
-        const fyStart = `${fyStartYear}-04-01`;
-        const fyEnd = `${fyStartYear + 1}-03-31`;
-        matchesDate = e.date >= fyStart && e.date <= fyEnd;
-      } else if (dateFilter === 'custom') {
-        const from = customDateRange.start || '0000-00-00';
-        const to = customDateRange.end || '9999-99-99';
-        matchesDate = e.date >= from && e.date <= to;
-      }
-
-      return matchesSearch && matchesCategory && matchesDate;
-    });
-  }, [props.expenses, searchTerm, categoryFilter, dateFilter, customDateRange]);
-
-  /**
-   * Groups filtered expenses by date and computes derived values.
-   */
-  const { groupedExpenses, sortedDates, grandTotal } = React.useMemo(() => {
-    const grouped = filteredExpenses.reduce((groups: Record<string, Expense[]>, expense) => {
-      const date = expense.date;
-      if (!groups[date]) {
-        groups[date] = [];
-      }
-      groups[date].push(expense);
-      return groups;
-    }, {});
-
-    return {
-      groupedExpenses: grouped,
-      sortedDates: Object.keys(grouped).sort((a, b) => b.localeCompare(a)),
-      grandTotal: filteredExpenses.reduce((sum, e) => sum + e.amount, 0),
-    };
-  }, [filteredExpenses]);
-
-  /**
-   * Calculates total for a group of expenses.
-   */
   const calculateTotal = (expenses: Expense[]) => {
     return expenses.reduce((sum, e) => sum + e.amount, 0);
   };
@@ -271,8 +197,8 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
               <div className="space-y-6">
                 {
                   groupedExpenses[date].map((expense) => (
-                    <div key={expense.id} className="glass-card p-5 group flex justify-between items-start">
-                      <div className="flex-1">
+                    <div key={expense.id} className="glass-card p-5 flex justify-between items-start">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3">
                           <span className="text-base font-semibold text-on-surface tracking-wide">
                             {CATEGORIES[expense.category]?.label || expense.category}
@@ -289,26 +215,28 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
                           </p>
                         )}
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className="text-lg font-semibold text-on-surface tracking-tight group-hover:text-primary-container transition-colors">
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <span className="text-lg font-semibold text-on-surface tracking-tight">
                           {CONFIG.CURRENCY_SYMBOL}{expense.amount.toFixed(2)}
                         </span>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {devMode && (
-                            <button
-                              className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-                              onClick={() => navigate(AppRoutes.IMPORT, { state: { editExpense: expense } })}
-                              title="Edit (Dev)"
-                            >
-                              Edit
-                            </button>
-                          )}
+                        <div className="flex gap-1">
                           <button
-                            className="text-xs font-medium uppercase tracking-[0.05em] text-on-surface-variant hover:text-red-400 transition-colors cursor-pointer"
-                            onClick={() => handleDelete(expense.id)}
-                            title="Drop"
+                            className="p-1.5 rounded-md text-on-surface-variant/60 hover:text-primary-container hover:bg-surface-container-high transition-colors cursor-pointer"
+                            onClick={() => navigate(AppRoutes.ADD, { state: { editExpense: expense } })}
+                            title="Edit"
                           >
-                            Drop
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
+                          <button
+                            className="p-1.5 rounded-md text-on-surface-variant/60 hover:text-red-400 hover:bg-surface-container-high transition-colors cursor-pointer"
+                            onClick={() => handleDelete(expense.id)}
+                            title="Delete"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>
