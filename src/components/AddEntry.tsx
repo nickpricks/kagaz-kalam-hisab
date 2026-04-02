@@ -4,9 +4,12 @@
  */
 
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CATEGORIES, getSubCategories } from '../data/categories';
-import { addExpense } from '../data/store';
+import { addExpense, updateExpense } from '../data/store';
 import { toLocalDateString } from '../helpers/dateUtils';
+import { AppRoutes } from '../constants/AppRoutes';
+import type { Expense } from '../data/types';
 
 interface AddEntryProps {
   onExpenseAdded: () => void;
@@ -16,12 +19,30 @@ interface AddEntryProps {
  * View component for adding a new expense.
  * @param props - Component props.
  */
+function parseEditExpense(state: unknown): Expense | null {
+  if (state == null || typeof state !== 'object') return null;
+  const s = state as Record<string, unknown>;
+  if (s.editExpense == null || typeof s.editExpense !== 'object') return null;
+  const e = s.editExpense as Record<string, unknown>;
+  if (
+    typeof e.id !== 'string' || !e.id ||
+    typeof e.date !== 'string' ||
+    typeof e.category !== 'string' ||
+    typeof e.amount !== 'number' || !isFinite(e.amount) || e.amount <= 0
+  ) return null;
+  return e as unknown as Expense;
+}
+
 export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
-  const [date, setDate] = React.useState(toLocalDateString(new Date()));
-  const [category, setCategory] = React.useState('');
-  const [subCat, setSubCat] = React.useState('');
-  const [amount, setAmount] = React.useState('');
-  const [note, setNote] = React.useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editExpense = parseEditExpense(location.state);
+
+  const [date, setDate] = React.useState(editExpense?.date ?? toLocalDateString(new Date()));
+  const [category, setCategory] = React.useState(editExpense?.category ?? '');
+  const [subCat, setSubCat] = React.useState(editExpense?.subCat ?? '');
+  const [amount, setAmount] = React.useState(editExpense ? editExpense.amount.toString() : '');
+  const [note, setNote] = React.useState(editExpense?.note ?? '');
   const [activeAmountPreset, setActiveAmountPreset] = React.useState<number | null>(null);
   const [validationError, setValidationError] = React.useState('');
 
@@ -35,6 +56,28 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     if (!category || !amount || parseFloat(amount) <= 0) {
       setValidationError('Please select a category and enter a valid amount.');
       setTimeout(() => setValidationError(''), 3000);
+      return;
+    }
+
+    if (editExpense) {
+      const result = updateExpense(editExpense.id, {
+        date,
+        category,
+        subCat,
+        amount: parseFloat(amount),
+        note,
+      });
+      if (!result.found) {
+        setValidationError('Could not update \u2014 expense may have been deleted.');
+        setTimeout(() => setValidationError(''), 3000);
+        return;
+      }
+      if (!result.saved) {
+        setValidationError('Expense updated in memory but may not persist \u2014 storage is full.');
+        setTimeout(() => setValidationError(''), 5000);
+      }
+      props.onExpenseAdded();
+      navigate(AppRoutes.LIST);
       return;
     }
 
@@ -87,8 +130,8 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     <div className="space-y-8 animate-fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-[1.75rem] font-medium tracking-tight text-on-surface">Add Entry</h2>
-          <p className="text-on-surface-variant text-[0.75rem] font-medium uppercase tracking-[0.05em] mt-1">New Transaction</p>
+          <h2 className="text-[1.75rem] font-medium tracking-tight text-on-surface">{editExpense ? 'Edit Entry' : 'Add Entry'}</h2>
+          <p className="text-on-surface-variant text-[0.75rem] font-medium uppercase tracking-[0.05em] mt-1">{editExpense ? 'Update Transaction' : 'New Transaction'}</p>
         </div>
         <button
           className="p-2 rounded-full text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high transition-colors active:scale-95"
@@ -225,7 +268,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
           className="btn-primary w-full mt-4"
           disabled={!isFormValid}
         >
-          Save Hisab
+          {editExpense ? 'Update Hisab' : 'Save Hisab'}
         </button>
       </form>
     </div>

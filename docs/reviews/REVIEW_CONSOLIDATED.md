@@ -6,6 +6,24 @@
 
 ---
 
+## Completion Status (as of 2026-04-02)
+
+**40 of 42 findings resolved.** Fixed across PRs #1, #2, #5, and branch `fix/review-remaining-all`.
+
+| Batch | Status |
+|-------|--------|
+| Batch 1 (Quick wins): #4, #6-10, #30, #37 | All 8 done |
+| Batch 2 (Foundation): #1-3, #5, #24 | All 5 done |
+| Batch 3 (Architecture): #15, #17, #18, #26, #27 | All 5 done |
+| Batch 4 (Polish): #19-20, #28, #31-42 | All done |
+| Security: `updateExpense` type tightened, runtime validation on `location.state` | Done |
+
+**New in `fix/review-remaining-all`**: #17 (component tests), #26 (useExpenseFilters hook), edit button for all users, `updateExpense` returns `{found, saved}`.
+
+**Remaining open**: None from this review. Future work tracked in `docs/plans/implementation_idea_v1.md`.
+
+---
+
 ## Prior Review Delta
 
 9 of 42 issues from ANALYSIS_REPORT2.md fixed (routing, tests, CSS/design). 33 remain.
@@ -563,34 +581,40 @@ JSDoc says `@param expense` but parameter is `expenseData`. Says "Partial" but t
 
 ## Implementation Order
 
-### Batch 1 — Quick wins (15 min, do all at once)
-- #4: Remove `as any` (or defer to #24 hard-delete)
-- #7: Delete `process.env.KEY` define
-- #8: Delete `App.css` + `debug_store.ts`
-- #9: Rename `stings.ts` to `strings.ts`
-- #10: Use `CONFIG.VERSION` in About.tsx
-- #6: Unify storage key to `CONFIG.STORAGE_KEYS.EXPENSES`
-- #37: Delete transitional comment
-- #30: Clean `.env.example`
+### Batch 1 — Quick wins ✅
+- [x] #4: Remove `as any` (resolved by #24 hard-delete)
+- [x] #7: Delete `process.env.KEY` define
+- [x] #8: Delete `App.css` + `debug_store.ts`
+- [x] #9: Rename `stings.ts` to `strings.ts`
+- [x] #10: Use `CONFIG.VERSION` in About.tsx
+- [x] #6: Unify storage key to `CONFIG.STORAGE_KEYS.EXPENSES`
+- [x] #37: Delete transitional comment
+- [x] #30: Clean `.env.example`
 
-### Batch 2 — Foundation (1-2 hours)
-- #3: Fix date timezone with string comparisons + `toLocalDateString` helper
-- #1: `saveToStorage` returns boolean, propagate through store
-- #2: Refactor import to accept validated array, add dedup
-- #5: Add ErrorBoundary component
-- #24: Hard delete + undo toast (replaces soft delete, kills `as any`, kills `window.confirm`)
+### Batch 2 — Foundation ✅
+- [x] #3: Fix date timezone with string comparisons + `toLocalDateString` helper
+- [x] #1: `saveToStorage` returns boolean, propagate through store
+- [x] #2: Refactor import to accept validated array, add dedup
+- [x] #5: Add ErrorBoundary component
+- [x] #24: Hard delete + undo toast (replaces soft delete)
 
-### Batch 3 — Architecture (half-day)
-- #26 + #18: Extract `useExpenseFilters` hook + add `useMemo`
-- #15: Add `storage` event listener for cross-tab sync
-- #17: Component tests for ExpenseList
-- #27: Add lint to CI
+### Batch 3 — Architecture ✅
+- [x] #26 + #18: Extract `useExpenseFilters` hook + add `useMemo`
+- [x] #15: Add `storage` event listener for cross-tab sync
+- [x] #17: Component tests for ExpenseList (6 tests, @testing-library/react + jsdom)
+- [x] #27: Add lint to CI
 
-### Batch 4 — Polish (whenever)
-- #19: PWA `autoUpdate`
-- #20: Remove dead path alias
-- Remaining docs fixes (#28, #31-35)
-- Remaining LOW items (#36, #38-42)
+### Batch 4 — Polish ✅
+- [x] #19: PWA `autoUpdate`
+- [x] #20: Remove dead path alias
+- [x] Docs fixes (#28, #31-35)
+- [x] LOW items (#36, #38-42)
+
+### Additional (fix/review-remaining-all)
+- [x] Edit button for all users (was devMode-only), always-visible action icons
+- [x] `updateExpense` returns `{found, saved}` (was ignoring save failures)
+- [x] `updateExpense` type tightened: excludes `isDeleted` and `updatedAt`
+- [x] Runtime validation on `location.state.editExpense` via `parseEditExpense()`
 
 ---
 

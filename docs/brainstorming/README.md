@@ -3,30 +3,27 @@
 ## Plan V2 ✅ Executed
 
 ### Current Situation -
-- List, Add, Import JSON
+- List, Add, Edit, Import JSON, About, ErrorBoundary
 
 ### Before we go futher
 #### Review
-- Add 
-   * ok
-- List
-   * Need search icon replacement
-   * List needs more filters (curent week, current month, last 12 months, curent financial year, last financial year, custom range)
--Import
-   * Need a mini json parser/validator - or at least some kind of validation to assert the required fileds.
+- [x] Add — ok
+- [x] List — search icon, 7 date filters (week/month/12mo/FY/custom), category filter, search
+- [x] Import — `validateImportData()` with date, category, amount validation + size limits
+- [x] Edit — inline edit via `/add` route with router state (replaced devMode editing)
 
 #### Add tests
-- Need 100% coverage
+- [x] Unit tests for store, localStorage, validation, categories
+- [x] Component tests for ExpenseList (filters, search, render, totals)
 
 #### Add New Expense
-- A small undo/reset button (icon) to reset form state
+- [x] Reset button (icon) to reset form state
+- [x] Amount preset bubbles (+10, +20, +50, +100, +200, +500)
 
 #### About section
-- A small about section with app info.
-- heading text is huge - needs to be consistent with other componenets
+- [x] About section with app info and CONFIG.VERSION
 
 #### Documentation
-- After completion - destroy exceptioannly large details - keep the TLDR verions with all main points
 - [x] remove cloud-selection.md
 - [x] remove failed-gh-deploy
 - [x] remove idea_v1_css.md
@@ -38,8 +35,9 @@
 - **Obsidian Lantern Design**: High-end urban night editorial UI. Uses `#131313`, `#FFC107`, Manrope typography. Defined by the "no-line" rule (ghost borders, heavy glassmorphism) and asymmetrical floating layouts.
 
 #### Github Actions
-- need to push - to verify deployment
+- [x] CI pipeline: install, lint, test, build, deploy to GitHub Pages
 
 ### Future
-- 
+- Phase 1.9: localStorage cleanup mechanism, data export
+- Phase 2: Cloud sync (Supabase)
 

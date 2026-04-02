@@ -72,20 +72,20 @@ describe("Store Logic", () => {
     expect(getExpenses()[0].id).toBe(expense.id);
   });
 
-  it("should update an expense and return true", () => {
+  it("should update an expense and return found+saved", () => {
     const { expense } = addExpense({ date: "2024-03-16", category: "food", amount: 100, note: "old", subCat: "" });
     const updated = updateExpense(expense.id, { amount: 250, note: "updated" });
-    expect(updated).toBe(true);
+    expect(updated).toEqual({ found: true, saved: true });
     const result = getExpenses()[0];
     expect(result.amount).toBe(250);
     expect(result.note).toBe("updated");
     expect(result.category).toBe("food"); // unchanged field preserved
   });
 
-  it("should return false when updating a non-existent id", () => {
+  it("should return found:false when updating a non-existent id", () => {
     addExpense({ date: "2024-03-16", category: "food", amount: 100, note: "", subCat: "" });
     const result = updateExpense("non-existent", { amount: 999 });
-    expect(result).toBe(false);
+    expect(result).toEqual({ found: false, saved: false });
     expect(getExpenses()[0].amount).toBe(100);
   });
 

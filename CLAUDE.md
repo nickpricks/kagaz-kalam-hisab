@@ -13,7 +13,7 @@ bun run dev          # Dev server on port 3000
 bun run dev:host     # Dev server accessible on LAN
 bun run build        # TypeScript check + Vite production build
 bun run lint         # ESLint on all .ts/.tsx
-bun test             # Vitest (src/__tests__/) — prints console.error from error-handling tests; check "0 fail" not the red text
+bun run test         # Vitest (src/__tests__/) — prints console.error from error-handling tests; check "0 fail" not the red text
 bun run preview      # Preview production build
 ```
 
@@ -24,24 +24,25 @@ Package manager is **Bun** (not npm/yarn).
 ```
 src/
   components/     # React view components (AddEntry, ExpenseList, BulkImport, etc.)
+  hooks/          # Custom React hooks (useExpenseFilters)
   data/           # Data layer: types.ts (Expense, CategoryDefinition), store.ts (CRUD), categories.ts
   utils/          # localStorage helpers, validation
-  helpers/        # Navigation helpers, string utils
+  helpers/        # Navigation helpers, string utils, date utils
   constants/      # Config.ts (app settings, storage keys), AppRoutes.ts (route paths)
-  __tests__/      # Vitest tests for store and validation
+  __tests__/      # Vitest tests (store, validation, component tests with jsdom)
 ```
 
 **Data flow**: Components call `store.ts` functions → store reads/writes `localStorage` via `utils/localStorage.ts` → data validated by `utils/validation.ts`.
 
 **Key patterns**:
-- Hard delete + undo toast (planned): `deleteExpense` physically removes records. Legacy soft-deleted records (`isDeleted: true`) still filtered by `getExpenses()`.
+- Hard delete + undo toast: `deleteExpense` physically removes records and returns the removed expense for undo. Legacy soft-deleted records (`isDeleted: true`) still filtered by `getExpenses()`.
 - IDs via `crypto.randomUUID()`, timestamps as ISO 8601.
 - Dates stored as `YYYY-MM-DD` strings.
 - Storage key defined once in `CONFIG.STORAGE_KEYS.EXPENSES` — always import from there, never hardcode.
 
 ## Routing
 
-React Router v7 with hash routing. Default route redirects to `/list`. Routes defined in `constants/AppRoutes.ts`: `/add`, `/list`, `/import`, `/about`.
+React Router v7 with hash routing. Default route redirects to `/list`. Routes defined in `constants/AppRoutes.ts`: `/add`, `/list`, `/import`, `/about`. The `/add` route doubles as edit — `ExpenseList` navigates to it with `{ state: { editExpense } }` and `AddEntry` detects edit mode via `location.state`.
 
 ## Styling
 
@@ -51,7 +52,7 @@ Tailwind CSS v4 via `@tailwindcss/vite` plugin. Custom theme in `src/index.css` 
 
 - Production base path: `/kagaz-kalam-hisab/` (GitHub Pages)
 - CI: GitHub Actions on push to `master` — install, test, build, deploy
-- PWA configured via `vite-plugin-pwa` with prompt-based registration
+- PWA configured via `vite-plugin-pwa` with auto-update registration
 
 ## TypeScript
 
