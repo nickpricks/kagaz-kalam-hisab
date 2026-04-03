@@ -9,6 +9,7 @@ import { CATEGORIES, getSubCategories } from '../data/categories';
 import { addExpense, updateExpense } from '../data/store';
 import { toLocalDateString } from '../helpers/dateUtils';
 import { AppRoutes } from '../constants/AppRoutes';
+import { CONFIG } from '../constants/Config';
 import type { Expense } from '../data/types';
 
 interface AddEntryProps {
@@ -44,9 +45,11 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
   const [amount, setAmount] = React.useState(editExpense ? editExpense.amount.toString() : '');
   const [note, setNote] = React.useState(editExpense?.note ?? '');
   const [activeAmountPreset, setActiveAmountPreset] = React.useState<number | null>(null);
+  const [showMoreAmounts, setShowMoreAmounts] = React.useState(false);
   const [validationError, setValidationError] = React.useState('');
 
   const amountPresets = [10, 20, 50, 100, 200, 500];
+  const extendedPresets = [0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5, 1000, 5000, 10000];
 
   /**
    * Handles form submission.
@@ -212,7 +215,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
 
         <div className="space-y-3">
           <label className="text-[0.75rem] font-medium uppercase tracking-[0.05em] text-on-surface-variant ml-1">
-            Amount (\u20B9) <span className="text-primary-container italic">*</span>
+            Amount ({CONFIG.CURRENCY_SYMBOL}) <span className="text-primary-container italic">*</span>
           </label>
           <div className="space-y-4">
             <input
@@ -242,7 +245,39 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                   </button>
                 ))
               }
+              <button
+                type="button"
+                className={`py-2 flex items-center justify-center rounded-[0.5rem] text-[0.75rem] font-medium tracking-[0.05em] transition-all duration-300 border
+                  ${showMoreAmounts
+                    ? 'bg-primary-container/20 text-primary-container border-primary-container/40'
+                    : 'bg-surface-container-high/40 text-on-surface-variant border-outline-variant/15 hover:border-primary-container/30 hover:text-primary-container active:scale-95'
+                  }`}
+                onClick={() => setShowMoreAmounts(!showMoreAmounts)}
+                title="More amounts"
+              >
+                ···
+              </button>
             </div>
+            {showMoreAmounts && (
+              <div className="grid grid-cols-6 gap-2 animate-fade-in">
+                {
+                  extendedPresets.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`py-2 flex items-center justify-center rounded-[0.5rem] text-[0.75rem] font-medium tracking-[0.05em] transition-all duration-300 border
+                        ${activeAmountPreset === p
+                          ? 'bg-primary-container/40 text-primary-container border-primary-container/50 shadow-glow-primary-intense scale-[0.95]'
+                          : 'bg-surface-container-high/40 text-on-surface-variant border-outline-variant/15 hover:border-primary-container/30 hover:text-primary-container active:scale-95'
+                        }`}
+                      onClick={() => handleAddAmount(p)}
+                    >
+                      +{p}
+                    </button>
+                  ))
+                }
+              </div>
+            )}
           </div>
         </div>
 

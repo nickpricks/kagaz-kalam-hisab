@@ -41,6 +41,10 @@ src/
 - Storage key defined once in `CONFIG.STORAGE_KEYS.EXPENSES` — always import from there, never hardcode.
 - All store write functions must propagate `saveToStorage`'s boolean return to callers — see `addExpense`/`updateExpense` as the pattern.
 - Router `location.state` is untyped at runtime — use a runtime validator before reading it. See `parseEditExpense()` in `AddEntry.tsx`.
+- Currency symbol: always use `CONFIG.CURRENCY_SYMBOL` — never use `\u20B9` in JSX text (unicode escapes don't resolve in JSX text nodes).
+- ExpenseList category filter uses tappable bubble buttons (not a `<select>`), toggling on re-click.
+- Default date filter is `current_month` (not `all`). Tests must use dates within the current month.
+- Amount presets: primary row `[10,20,50,100,200,500]` + expandable extended row via `···` button.
 
 ## Routing
 
@@ -54,7 +58,7 @@ Tailwind CSS v4 via `@tailwindcss/vite` plugin. Custom theme in `src/index.css` 
 
 - Production base path: `/kagaz-kalam-hisab/` (GitHub Pages)
 - CI: GitHub Actions on push to `master` — install, test, build, deploy
-- PWA configured via `vite-plugin-pwa` with auto-update registration
+- PWA configured via `vite-plugin-pwa` with prompt-based update (`ReloadPrompt` component in App.tsx). Type `vite-plugin-pwa/react` registered in `tsconfig.app.json`.
 
 ## Testing
 

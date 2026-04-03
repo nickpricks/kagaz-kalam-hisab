@@ -34,7 +34,7 @@ interface UseExpenseFiltersResult {
  */
 export function useExpenseFilters(expenses: Expense[]): UseExpenseFiltersResult {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [dateFilter, setDateFilter] = React.useState('all');
+  const [dateFilter, setDateFilter] = React.useState('current_month');
   const [customDateRange, setCustomDateRange] = React.useState<CustomDateRange>({ start: '', end: '' });
   const [categoryFilter, setCategoryFilter] = React.useState('all');
 
