@@ -47,9 +47,12 @@ describe('ExpenseList', () => {
   });
 
   it('renders expenses grouped by date', () => {
+    // Both dates must be within current month (default filter)
+    const now = new Date();
+    const earlier = new Date(now.getFullYear(), now.getMonth(), 1);
     const expenses = [
       makeExpense({ note: 'Morning chai', amount: 20 }),
-      makeExpense({ note: 'Lunch thali', amount: 150, date: '2025-12-01' }),
+      makeExpense({ note: 'Lunch thali', amount: 150, date: toLocalDateString(earlier) }),
     ];
     renderList(expenses);
 
@@ -64,22 +67,26 @@ describe('ExpenseList', () => {
 
   it('filters by "today" and shows only today\'s entries', () => {
     const today = toLocalDateString(new Date());
+    // Use a date within current month but not today
+    const earlier = new Date();
+    earlier.setDate(1);
+    const notToday = toLocalDateString(earlier);
     const expenses = [
       makeExpense({ note: 'Today entry', date: today }),
-      makeExpense({ note: 'Old entry', date: '2024-01-01' }),
+      makeExpense({ note: 'Earlier entry', date: notToday }),
     ];
     renderList(expenses);
 
-    // Both visible initially (All Dates filter)
+    // Both visible initially (current month default)
     expect(screen.getByText('Today entry')).toBeInTheDocument();
-    expect(screen.getByText('Old entry')).toBeInTheDocument();
+    expect(screen.getByText('Earlier entry')).toBeInTheDocument();
 
     // Switch to "today" filter
     const selects = screen.getAllByRole('combobox');
     fireEvent.change(selects[0], { target: { value: 'today' } });
 
     expect(screen.getByText('Today entry')).toBeInTheDocument();
-    expect(screen.queryByText('Old entry')).not.toBeInTheDocument();
+    expect(screen.queryByText('Earlier entry')).not.toBeInTheDocument();
   });
 
   it('filters by category', () => {
@@ -89,9 +96,8 @@ describe('ExpenseList', () => {
     ];
     renderList(expenses);
 
-    // Switch category filter (second combobox)
-    const selects = screen.getAllByRole('combobox');
-    fireEvent.change(selects[1], { target: { value: 'food' } });
+    // Click category bubble to filter
+    fireEvent.click(screen.getByRole('button', { name: /Food/ }));
 
     expect(screen.getByText('Food item')).toBeInTheDocument();
     expect(screen.queryByText('Transport item')).not.toBeInTheDocument();

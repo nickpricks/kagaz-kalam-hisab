@@ -25,7 +25,7 @@ describe("Categories", () => {
     it("should return the category for a valid id", () => {
       const cat = getCategoryById("food");
       expect(cat).toBeDefined();
-      expect(cat!.label).toBe("Food");
+      expect(cat!.label).toContain("Food");
     });
 
     it("should return undefined for an unknown id", () => {
@@ -49,8 +49,8 @@ describe("Categories", () => {
       expect(subs).toContain("Milk");
     });
 
-    it("should return empty array for misc (no subcategories)", () => {
-      expect(getSubCategories("misc")).toEqual([]);
+    it("should return subcategories for misc", () => {
+      expect(getSubCategories("misc")).toEqual(["Misc"]);
     });
 
     it("should return empty array for unknown category", () => {

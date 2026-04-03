@@ -18,6 +18,7 @@ import { AddEntry } from './components/AddEntry';
 import { ExpenseList } from './components/ExpenseList';
 import { BulkImport } from './components/BulkImport';
 import { About } from './components/About';
+import { ReloadPrompt } from './components/ReloadPrompt';
 
 // Initialize schema version on first load
 initSchemaVersion();
@@ -81,6 +82,7 @@ export const App: React.FC = () => {
           </div>
         }
       </div>
+      <ReloadPrompt />
     </div>
   );
 };

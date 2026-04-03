@@ -80,13 +80,24 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
     return expenses.reduce((sum, e) => sum + e.amount, 0);
   };
 
+  const dateFilterLabels: Record<string, string> = {
+    all: 'Total Spent',
+    today: 'Spent Today',
+    current_week: 'Spent This Week',
+    current_month: 'Spent This Month',
+    last_12_months: 'Spent Last 12 Months',
+    current_fy: 'Spent This FY',
+    last_fy: 'Spent Last FY',
+    custom: 'Spent in Range',
+  };
+
   return (
     <div className="space-y-12">
       {/* Asymmetrical Layout for Header / Balance */}
       <div className="flex flex-col items-start gap-2">
         <div className="flex items-center gap-3 mb-2">
           <div className="h-1.5 w-1.5 rounded-full bg-primary-container animate-[pulse_2s_ease-in-out_infinite]" />
-          <p className="text-on-surface-variant text-xs font-medium uppercase tracking-[0.05em]">Total Balance</p>
+          <p className="text-on-surface-variant text-xs font-medium uppercase tracking-[0.05em]">{dateFilterLabels[dateFilter] ?? 'Total Spent'}</p>
         </div>
         <div className="text-[3.5rem] leading-none font-display tracking-tight text-on-surface flex items-baseline gap-1">
           <span className="text-primary-container/80 text-3xl font-sans font-normal">{CONFIG.CURRENCY_SYMBOL}</span>
@@ -107,33 +118,35 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <select
-            className="input-field py-2 text-sm appearance-none cursor-pointer flex-1 min-w-[140px]"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-          >
-            <option value="all">All Dates</option>
-            <option value="today">Today</option>
-            <option value="current_week">Current Week</option>
-            <option value="current_month">Current Month</option>
-            <option value="last_12_months">Last 12 Months</option>
-            <option value="current_fy">Current Fin Year</option>
-            <option value="last_fy">Last Fin Year</option>
-            <option value="custom">Custom Range</option>
-          </select>
-          <select
-            className="input-field py-2 text-sm appearance-none cursor-pointer flex-1 min-w-[140px]"
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-          >
-            <option value="all">All Categories</option>
-            {
-              Object.values(CATEGORIES).map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.label}</option>
-              ))
-            }
-          </select>
+        <select
+          className="input-field py-2 text-sm appearance-none cursor-pointer"
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+        >
+          <option value="all">All Dates</option>
+          <option value="today">Today</option>
+          <option value="current_week">Current Week</option>
+          <option value="current_month">Current Month</option>
+          <option value="last_12_months">Last 12 Months</option>
+          <option value="current_fy">Current Fin Year</option>
+          <option value="last_fy">Last Fin Year</option>
+          <option value="custom">Custom Range</option>
+        </select>
+        <div className="flex flex-wrap gap-2">
+          {Object.values(CATEGORIES).map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              className={`py-1.5 px-3 rounded-full text-[10.5px] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
+                ${categoryFilter === cat.id
+                  ? 'bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-subtle'
+                  : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface'
+                }`}
+              onClick={() => setCategoryFilter(categoryFilter === cat.id ? 'all' : cat.id)}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
 
         {dateFilter === 'custom' && (

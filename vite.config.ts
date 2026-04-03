@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         devOptions: { enabled: true },
         manifest: {
           name: env.VITE_APP_NAME || 'Kagaz Kalam Hisab',
