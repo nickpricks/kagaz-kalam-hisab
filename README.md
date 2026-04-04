@@ -14,6 +14,7 @@ A local-first expense tracker PWA. Dark obsidian theme, glass-morphism UI, ₹ c
 - Bulk JSON import with validation
 - PWA with offline support and update prompt
 - Dynamic "Spent This Month / Today / ..." header
+- Changelog viewer on About page
 
 ## Quick Start
 
