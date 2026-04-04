@@ -48,8 +48,8 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
   const [showMoreAmounts, setShowMoreAmounts] = React.useState(false);
   const [validationError, setValidationError] = React.useState('');
 
-  const amountPresets = [10, 20, 50, 100, 200, 500];
-  const extendedPresets = [0.1, 0.2, 0.3, 0.5, 1, 2, 3, 5, 1000, 5000, 10000];
+  const amountPresets = [10, 20, 50, 100, 200];
+  const extendedPresets = [0.1, 0.2, 0.5, 1, 2, 5, 500, 1000, 2000, 5000, 10000];
 
   /**
    * Handles form submission.
@@ -109,6 +109,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     setSubCat('');
     setAmount('');
     setNote('');
+    setShowMoreAmounts(false);
     setValidationError('');
   };
 
@@ -163,26 +164,42 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
           <label className="text-[0.75rem] font-medium uppercase tracking-[0.05em] text-on-surface-variant ml-1">
             Category <span className="text-primary-container italic">*</span>
           </label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-wrap gap-2">
             {
-              Object.values(CATEGORIES).map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  className={`py-3 px-2 rounded-[0.5rem] text-[0.75rem] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
-                    ${category === cat.id
-                      ? 'bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-medium scale-[0.98]'
-                      : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface active:scale-95 active:shadow-glow-primary-subtle'
-                    }`}
-                  onClick={() => {
-                    setCategory(cat.id);
-                    setSubCat('');
-                    setValidationError('');
-                  }}
-                >
-                  {cat.label}
-                </button>
-              ))
+              Object.values(CATEGORIES).map((cat) => {
+                const [emoji, ...rest] = cat.label.split(' ');
+                const text = rest.join(' ');
+                const isSelected = category === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    className={`group inline-flex items-center justify-center rounded-full transition-all duration-300 border
+                      ${isSelected
+                        ? 'h-10 px-4 gap-2 bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-medium'
+                        : 'h-10 w-10 bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:bg-surface-container-high/40 active:scale-95 active:shadow-glow-primary-subtle'
+                      }`}
+                    onClick={() => {
+                      if (isSelected) {
+                        setCategory('');
+                      } else {
+                        setCategory(cat.id);
+                      }
+                      setSubCat('');
+                      setValidationError('');
+                    }}
+                    aria-label={cat.label}
+                    title={cat.label}
+                  >
+                    <span className="text-base leading-none">{emoji}</span>
+                    {isSelected && (
+                      <span className="text-[0.7rem] font-semibold uppercase tracking-[0.05em] animate-fade-in whitespace-nowrap">
+                        {text}
+                      </span>
+                    )}
+                  </button>
+                );
+              })
             }
           </div>
         </div>
@@ -202,7 +219,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
                           ? 'bg-secondary/20 text-secondary border-secondary/40'
                           : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface'
                         }`}
-                      onClick={() => setSubCat(sc)}
+                      onClick={() => setSubCat(subCat === sc ? '' : sc)}
                     >
                       {sc}
                     </button>

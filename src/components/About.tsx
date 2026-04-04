@@ -54,8 +54,8 @@ export const About: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
-            <a href="https://github.com/nickpricks" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Github</a>
-            <a href="mailto:nitesh+github@gmail.com?subject=Kagaz Kalam Hisab Feedback" className="hover:text-primary transition-colors italic">Feedback 📬</a>
+            <a href="https://github.com/nickpricks/kagaz-kalam-hisab" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Github</a>
+            <a href="mailto:niteshkac+github@gmail.com?subject=Kagaz Kalam Hisab Feedback" className="hover:text-primary transition-colors italic">Feedback 📬</a>
           </div>
         </div>
       </div>
