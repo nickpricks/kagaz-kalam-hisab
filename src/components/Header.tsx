@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { AppRoutes, type AppRoute } from '../constants/AppRoutes';
+import { AppRoutes } from '../constants/AppRoutes';
 import { CONFIG } from '../constants/Config';
 import { capFirstLetter } from '../helpers/strings';
 
@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
         <nav className="flex gap-1">
           {
             Object.keys(AppRoutes).map((key) => {
-              const route = AppRoutes[key as keyof typeof AppRoutes] as AppRoute;
+              const route = AppRoutes[key as keyof typeof AppRoutes];
               const label = capFirstLetter(key.toLocaleLowerCase());
               return (
                 <NavLink

@@ -5,11 +5,14 @@
 
 import React from 'react';
 import { CONFIG } from '../constants/Config';
+import changelogRaw from '../../CHANGELOG.md?raw';
 
 /**
  * About component.
  */
 export const About: React.FC = () => {
+  const [showChangelog, setShowChangelog] = React.useState(false);
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-1">
@@ -48,10 +51,20 @@ export const About: React.FC = () => {
         </div>
 
         <div className="pt-6 border-t border-outline/20 flex flex-wrap gap-4 items-center justify-between">
-          <div className="flex gap-4">
+          <div className="flex items-center gap-2">
             <div className="px-3 py-1 bg-surface-container rounded-full border border-outline/20 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
               v{CONFIG.VERSION}
             </div>
+            <button
+              type="button"
+              className="w-6 h-6 flex items-center justify-center rounded-full border border-outline/20 text-on-surface-variant/60 hover:text-primary-container hover:border-primary-container/40 transition-colors"
+              onClick={() => setShowChangelog(true)}
+              title="View Changelog"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
           </div>
           <div className="flex gap-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
             <a href="https://github.com/nickpricks/kagaz-kalam-hisab" target="_blank" rel="noreferrer" className="hover:text-primary transition-colors">Github</a>
@@ -59,6 +72,32 @@ export const About: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {showChangelog && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+          onClick={() => setShowChangelog(false)}
+        >
+          <div
+            className="glass-panel w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-outline/20">
+              <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-on-surface">Changelog</h3>
+              <button
+                type="button"
+                className="p-1.5 rounded-full text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high transition-colors"
+                onClick={() => setShowChangelog(false)}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <pre className="p-4 overflow-y-auto text-xs leading-relaxed text-on-surface-variant font-mono whitespace-pre-wrap">{changelogRaw}</pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,17 +2,27 @@
 
 All notable changes to Kagaz Kalam Hisab are documented here.
 
-## [Released]
+## [0.0.2] — 2026-04-04
 
 ### Files Changed
 
 | File | State | Change |
 |------|-------|--------|
-| `src/components/AddEntry.tsx` | ✅ Committed | Emoji-only categories, deselect toggle, reset collapse, amount presets |
+| `src/components/AddEntry.tsx` | ✅ Committed | Emoji-only categories, deselect toggle, reset collapse, ValidationMsg constants |
 | `src/components/ExpenseList.tsx` | ✅ Committed | Emoji-only category filter bubbles with aria-label |
-| `src/components/About.tsx` | ✅ Committed | GitHub repo link + feedback email fixed |
-| `CHANGELOG.md` | ✅ Committed | Added unreleased entries for all review fixes |
-| `docs/reviews/reviews.md` | ✅ Committed | Rewritten review tracker with AFP cross-reference |
+| `src/components/About.tsx` | ⏳ Staged | GitHub repo link, feedback email, changelog modal with ?raw import |
+| `src/components/BulkImport.tsx` | ✅ Committed | ImportMsg constants replacing inline strings |
+| `src/components/Header.tsx` | ✅ Committed | Removed unused AppRoute type import |
+| `src/constants/Messages.ts` | ✅ Committed | New — ValidationMsg and ImportMsg constants |
+| `src/constants/AppRoutes.ts` | ✅ Committed | Removed unused AppRoute type export |
+| `src/constants/Config.ts` | ✅ Committed | Version bumped to 0.0.2 |
+| `package.json` | ✅ Committed | Version bumped to 0.0.2 |
+| `.env.example` | ⏳ Staged | Version 0.0.2, removed v prefix |
+| `CHANGELOG.md` | ⏳ Staged | Release notes for 0.0.2 |
+| `CLAUDE.md` | ✅ Committed | Updated version, architecture, patterns, reviews |
+| `README.md` | ✅ Committed | Updated category description |
+| `docs/plans/implementation_idea_v1.md` | ✅ Committed | Added Phase 1.9, updated category tree |
+| `docs/reviews/reviews.md` | ✅ Committed | All 8 Nick items fixed, AFP #5 #6 fixed |
 
 ### Added
 - **PWA update prompt**: Switched from silent `autoUpdate` to `prompt` strategy with a reload toast (`ReloadPrompt` component) matching the existing undo-toast design.
@@ -21,6 +31,8 @@ All notable changes to Kagaz Kalam Hisab are documented here.
 - **Bills subcategories**: Added "Gas" and "Tax" under Bills.
 - **Dynamic spend label**: Header shows contextual label ("Spent This Month", "Spent Today", etc.) based on selected date filter.
 - **Emoji-only category design**: Categories in AddEntry and ExpenseList now show as compact emoji circles that expand into pills with the full label on select. `aria-label` for accessibility.
+- **Error message constants**: `constants/Messages.ts` with `ValidationMsg` and `ImportMsg` — no more inline strings in components.
+- **Changelog modal**: About page now has an ℹ️ button next to the version badge that opens a glass-morphism modal displaying the full CHANGELOG in a `<pre>` block. Uses Vite `?raw` import.
 
 ### Changed
 - Default list timeframe changed from "All Dates" to "Current Month".
@@ -28,6 +40,9 @@ All notable changes to Kagaz Kalam Hisab are documented here.
 - Amount presets: primary row now `[10,20,50,100,200]` (removed 500), extended row expanded with `[500,2000]` added.
 - About page GitHub link now points to repo (`nickpricks/kagaz-kalam-hisab`).
 - About page feedback email updated to `niteshkac+github@gmail.com`.
+- Removed unused `AppRoute` type from `AppRoutes.ts` and `Header.tsx`.
+- Version bumped to 0.0.2.
+- `.env.example` version updated to `0.0.2` (was `v0.0.1` with wrong prefix).
 
 ### Fixed
 - Amount label on AddEntry showed literal `\u20B9` instead of ₹ — now uses `CONFIG.CURRENCY_SYMBOL`.

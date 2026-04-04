@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Kagaz Kalam Hisab — a local-first expense tracker PWA built with React 19, TypeScript, Vite 8, and Tailwind CSS v4. Currently at v0.0.1 (LocalStorage MVP). Currency is ₹ (Indian Rupee).
+Kagaz Kalam Hisab — a local-first expense tracker PWA built with React 19, TypeScript, Vite 8, and Tailwind CSS v4. Currently at v0.0.2 (fix/review-bugs-batch1 branch). Currency is ₹ (Indian Rupee).
 
 ## Commands
 
@@ -28,7 +28,7 @@ src/
   data/           # Data layer: types.ts (Expense, CategoryDefinition), store.ts (CRUD), categories.ts
   utils/          # localStorage helpers, validation
   helpers/        # Navigation helpers, string utils, date utils
-  constants/      # Config.ts (app settings, storage keys), AppRoutes.ts (route paths)
+  constants/      # Config.ts (app settings, storage keys), AppRoutes.ts (route paths), Messages.ts (user-facing strings)
   __tests__/      # Vitest tests (store, validation, component tests with jsdom)
 ```
 
@@ -42,9 +42,11 @@ src/
 - All store write functions must propagate `saveToStorage`'s boolean return to callers — see `addExpense`/`updateExpense` as the pattern.
 - Router `location.state` is untyped at runtime — use a runtime validator before reading it. See `parseEditExpense()` in `AddEntry.tsx`.
 - Currency symbol: always use `CONFIG.CURRENCY_SYMBOL` — never use `\u20B9` in JSX text (unicode escapes don't resolve in JSX text nodes).
-- ExpenseList category filter uses tappable bubble buttons (not a `<select>`), toggling on re-click.
+- ExpenseList category filter uses tappable emoji bubble buttons (not a `<select>`), toggling on re-click. Emoji-only by default, pill expands to show full label on select.
+- AddEntry categories also use emoji-only bubbles with pill expand. Both category and sub-category support deselect via re-tap.
 - Default date filter is `current_month` (not `all`). Tests must use dates within the current month.
-- Amount presets: primary row `[10,20,50,100,200,500]` + expandable extended row via `···` button.
+- Amount presets: primary row `[10,20,50,100,200]` + expandable extended row via `···` button. Reset collapses extended row.
+- User-facing error/validation strings live in `constants/Messages.ts` (`ValidationMsg`, `ImportMsg`) — don't inline new strings in components.
 
 ## Routing
 
@@ -74,7 +76,7 @@ Planning docs live in `docs/brainstorming/` (not `docs/brainstorm/`). `docs/plan
 
 ## Reviews
 
-Review reports in `docs/reviews/`. `REVIEW_CONSOLIDATED.md` is the active issue tracker with concrete fix suggestions per finding. Check it before starting fix work.
+Review reports in `docs/reviews/`. `reviews.md` is the active issue tracker (Nick review + AFP cross-reference). `REVIEW_CONSOLIDATED.md` has historical agent review findings. Check `reviews.md` before starting fix work.
 
 ## Commit Convention
 

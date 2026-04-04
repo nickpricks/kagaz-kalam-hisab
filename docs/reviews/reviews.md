@@ -11,7 +11,7 @@ Bugs and suggestions from manual review.
 | 3 | Select category → select sub-cat → deselect — clicking category bubble deselects sub-cat | ✅ Fixed | Sub-cat toggle added, category deselect clears sub-cat |
 | 4 | Amount bubbles — remove 500 from primary row, expand extended range | ✅ Fixed | Primary: `[10,20,50,100,200]`, Extended: `[0.1,0.2,0.5,1,2,5,500,1000,2000,5000,10000]` |
 | 5 | After add — expected amounts remain open, but reset form should close them | ✅ Fixed | `handleReset` now calls `setShowMoreAmounts(false)` |
-| 6 | About page version update | 🔲 Open | Still at 0.0.1 — needs version bump decision (not part of this batch) |
+| 6 | About page version update | ✅ Fixed | Bumped to 0.0.2 in package.json, Config.ts, CHANGELOG |
 | 7 | GitHub link needs repo link | ✅ Fixed | Changed to `nickpricks/kagaz-kalam-hisab` |
 | 8 | Feedback email needs changed | ✅ Fixed | Updated to `niteshkac+github@gmail.com` |
 
@@ -23,8 +23,8 @@ Patterns from the AFP code review (2026-04-02) that also apply here.
 |---|-----------|-------------------|-------|
 | 3 | Keep package.json commands separate, no `&&` chaining | ✅ OK | Scripts already use separate commands |
 | 4 | All constants from config, deriving from .env | ✅ OK | `CONFIG` in `constants/Config.ts` pulls from env |
-| 5 | Routes should be an enum | 🔲 Open | Currently plain string constants in `AppRoutes.ts` — consider enum |
-| 6 | Standard errors/messages as enum/constant | 🔲 Open | Validation errors are inline strings in AddEntry |
+| 5 | Routes should be an enum | ✅ Fixed | Removed unused `AppRoute` type; `as const` kept (enum blocked by `erasableSyntaxOnly`) |
+| 6 | Standard errors/messages as enum/constant | ✅ Fixed | `constants/Messages.ts` with `ValidationMsg` and `ImportMsg` |
 | 8 | Types need a dedicated place | ✅ OK | `data/types.ts` has core types |
 | 9 | No `\|\|` fallbacks — use `??` with proper config | ✅ OK | Config uses `??` with env defaults |
 | 10 | Storage keys as constants | ✅ OK | `CONFIG.STORAGE_KEYS` |

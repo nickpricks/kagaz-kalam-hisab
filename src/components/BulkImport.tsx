@@ -7,6 +7,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { importExpenses } from '../data/store';
 import { validateImportData } from '../utils/validation';
+import { ImportMsg } from '../constants/Messages';
 import type { Expense } from '../data/types';
 
 const MAX_INPUT_SIZE = 1_000_000; // 1MB
@@ -38,7 +39,7 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
     if (!jsonInput.trim()) return;
 
     if (jsonInput.length > MAX_INPUT_SIZE) {
-      setStatus({ message: `Input too large (${(jsonInput.length / 1_000_000).toFixed(1)}MB). Maximum is 1MB.`, isError: true });
+      setStatus({ message: ImportMsg.INPUT_TOO_LARGE((jsonInput.length / 1_000_000).toFixed(1)), isError: true });
       return;
     }
 
@@ -46,18 +47,18 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
       const parsed = JSON.parse(jsonInput);
 
       if (!Array.isArray(parsed)) {
-        setStatus({ message: 'Data must be an array of objects.', isError: true });
+        setStatus({ message: ImportMsg.NOT_ARRAY, isError: true });
         return;
       }
 
       if (parsed.length > MAX_ENTRY_COUNT) {
-        setStatus({ message: `Too many entries (${parsed.length}). Maximum is ${MAX_ENTRY_COUNT}.`, isError: true });
+        setStatus({ message: ImportMsg.TOO_MANY_ENTRIES(parsed.length, MAX_ENTRY_COUNT), isError: true });
         return;
       }
 
       const validation = validateImportData(parsed);
       if (!validation.isValid) {
-        setStatus({ message: `Validation failed: ${validation.error}`, isError: true });
+        setStatus({ message: ImportMsg.VALIDATION_FAILED(validation.error!), isError: true });
         return;
       }
 
@@ -83,10 +84,10 @@ export const BulkImport: React.FC<BulkImportProps> = (props: BulkImportProps) =>
         setJsonInput('');
         props.onImportSuccess();
       } else {
-        setStatus({ message: 'Import failed: could not save to storage.', isError: true });
+        setStatus({ message: ImportMsg.STORAGE_FAILED, isError: true });
       }
     } catch {
-      setStatus({ message: 'Invalid JSON format. Please check your data.', isError: true });
+      setStatus({ message: ImportMsg.INVALID_JSON, isError: true });
     }
   };
 

@@ -8,12 +8,13 @@ A local-first expense tracker PWA. Dark obsidian theme, glass-morphism UI, ₹ c
 ## Features
 
 - Add/edit/delete expenses with undo
-- Category tree with subcategories (Food, Shopping, Travel, Vehicle, Bills, Medical, Care, Gifts, Education, Misc)
+- 15 categories with subcategories — emoji-only compact bubbles, expand to pill on select
 - Tappable category bubble filter + date range filters (today, week, month, FY, custom)
 - Quick-add amount presets with expandable extended row
-- Bulk CSV import
+- Bulk JSON import with validation
 - PWA with offline support and update prompt
 - Dynamic "Spent This Month / Today / ..." header
+- Changelog viewer on About page
 
 ## Quick Start
 
