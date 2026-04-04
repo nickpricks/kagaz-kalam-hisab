@@ -133,20 +133,32 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
           <option value="custom">Custom Range</option>
         </select>
         <div className="flex flex-wrap gap-2">
-          {Object.values(CATEGORIES).map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              className={`py-1.5 px-3 rounded-full text-[10.5px] font-medium uppercase tracking-[0.05em] transition-all duration-300 border
-                ${categoryFilter === cat.id
-                  ? 'bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-subtle'
-                  : 'bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:text-on-surface'
-                }`}
-              onClick={() => setCategoryFilter(categoryFilter === cat.id ? 'all' : cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {Object.values(CATEGORIES).map((cat) => {
+            const [emoji, ...rest] = cat.label.split(' ');
+            const text = rest.join(' ');
+            const isSelected = categoryFilter === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                className={`inline-flex items-center justify-center rounded-full transition-all duration-300 border
+                  ${isSelected
+                    ? 'h-8 px-3 gap-1.5 bg-primary-container/20 text-primary-container border-primary-container/40 shadow-glow-primary-subtle'
+                    : 'h-8 w-8 bg-background/50 text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30 hover:bg-surface-container-high/40 active:scale-95'
+                  }`}
+                onClick={() => setCategoryFilter(isSelected ? 'all' : cat.id)}
+                aria-label={cat.label}
+                title={cat.label}
+              >
+                <span className="text-sm leading-none">{emoji}</span>
+                {isSelected && (
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.05em] animate-fade-in whitespace-nowrap">
+                    {text}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {dateFilter === 'custom' && (
