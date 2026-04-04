@@ -7,7 +7,7 @@ import React from 'react';
 import type { Expense } from '../data/types';
 import { CATEGORIES } from '../data/categories';
 import { deleteExpense, insertExpense } from '../data/store';
-import { CONFIG } from '../constants/Config';
+import { CONFIG, UNDO_TIMEOUT_MS } from '../constants/Config';
 import { useExpenseFilters } from '../hooks/useExpenseFilters';
 
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,6 @@ interface ExpenseListProps {
   onExpenseDeleted: () => void;
 }
 
-const UNDO_TIMEOUT_MS = 5000;
 
 /**
  * View component for listing expenses.
@@ -74,6 +73,15 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
     setUndoExpense(null);
     undoTimerRef.current = null;
     props.onExpenseDeleted(); // refresh list
+  };
+
+  /**
+   * Dismisses the undo toast, confirming the deletion.
+   */
+  const handleDismissUndo = () => {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    setUndoExpense(null);
+    undoTimerRef.current = null;
   };
 
   const calculateTotal = (expenses: Expense[]) => {
@@ -285,6 +293,15 @@ export const ExpenseList: React.FC<ExpenseListProps> = (props: ExpenseListProps)
             onClick={handleUndo}
           >
             Undo
+          </button>
+          <button
+            className="p-1 rounded-full text-on-surface-variant/60 hover:text-on-surface transition-colors"
+            onClick={handleDismissUndo}
+            title="Dismiss"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
       )}

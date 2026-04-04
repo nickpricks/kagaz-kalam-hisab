@@ -3,6 +3,8 @@
  * @description Application-level configuration.
  */
 
+export const UNDO_TIMEOUT_MS = 30_000;
+
 export const CONFIG = {
   APP_NAME: import.meta.env.VITE_APP_NAME || 'KAGAZ KALAM HISAB',
   CURRENCY_SYMBOL: '₹',
