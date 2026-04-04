@@ -10,6 +10,7 @@ import { addExpense, updateExpense } from '../data/store';
 import { toLocalDateString } from '../helpers/dateUtils';
 import { AppRoutes } from '../constants/AppRoutes';
 import { CONFIG } from '../constants/Config';
+import { ValidationMsg } from '../constants/Messages';
 import type { Expense } from '../data/types';
 
 interface AddEntryProps {
@@ -57,7 +58,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!category || !amount || parseFloat(amount) <= 0) {
-      setValidationError('Please select a category and enter a valid amount.');
+      setValidationError(ValidationMsg.CATEGORY_AND_AMOUNT);
       setTimeout(() => setValidationError(''), 3000);
       return;
     }
@@ -71,12 +72,12 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
         note,
       });
       if (!result.found) {
-        setValidationError('Could not update \u2014 expense may have been deleted.');
+        setValidationError(ValidationMsg.UPDATE_NOT_FOUND);
         setTimeout(() => setValidationError(''), 3000);
         return;
       }
       if (!result.saved) {
-        setValidationError('Expense updated in memory but may not persist \u2014 storage is full.');
+        setValidationError(ValidationMsg.UPDATE_STORAGE_FULL);
         setTimeout(() => setValidationError(''), 5000);
       }
       props.onExpenseAdded();
@@ -93,7 +94,7 @@ export const AddEntry: React.FC<AddEntryProps> = (props: AddEntryProps) => {
     });
 
     if (!saved) {
-      setValidationError('Expense recorded but may not persist \u2014 storage is full.');
+      setValidationError(ValidationMsg.ADD_STORAGE_FULL);
       setTimeout(() => setValidationError(''), 5000);
     }
 

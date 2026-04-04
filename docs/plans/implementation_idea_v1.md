@@ -35,6 +35,15 @@ This document serves as the project's living roadmap and finalized implementatio
 
 ---
 
+### [x] Phase 1.9: Review Bugs Batch 1 ✅
+- [x] **Emoji-only categories**: Compact emoji circles in AddEntry + ExpenseList, pill expand on select with `aria-label`.
+- [x] **Category deselect**: Re-tap toggles off in both AddEntry (category + sub-cat) and ExpenseList.
+- [x] **Amount presets**: Primary row `[10,20,50,100,200]`, extended row expanded with 500, 2000.
+- [x] **Reset form**: Now collapses extended amount presets.
+- [x] **About page**: GitHub link → repo URL, feedback email updated.
+- [x] **Error constants**: `Messages.ts` with `ValidationMsg` and `ImportMsg` — no more inline strings.
+- [x] **Routes cleanup**: Removed unused `AppRoute` type.
+
 ### [x] Phase 1.8: Review Fixes & Architecture ✅
 - [x] **Edit Flow**: Inline edit via `/add` route with router state (replaces devMode editing).
 - [x] **Hard Delete**: `deleteExpense` physically removes records + undo toast (5s). Replaces soft-delete for new records.
@@ -74,14 +83,19 @@ interface Expense {
 }
 ```
 
-### Category Tree (Verified)
-- **Food** → Milk, Snacks, Groceries, Healthy, Orders
-- **Shopping** → Veggies, Fruits, Fashion, Ration, Electronics
-- **Travel** → Air, Train, Bus, Road Toll
-- **Vehicle** → Fuel, Maintenance, Washing
-- **Bills** → Phone, Internet, Subscriptions, Entertainment, Rent, Electricity, Society, Insurance
-- **Medical** → Doctor/Consultation, Medicines, Tests
-- **Care** → Personal, Grooming, Massage
-- **Gifts** → Ceremonies, Charity, Donations
-- **Education** → Courses, Books
-- **Misc**
+### Category Tree (15 categories — see `data/categories.ts` for source of truth)
+- **Food** → Milk, Snacks, Groceries, Healthy, Orders, Beverages
+- **Shopping** → Veggies, Fruits, Fashion, Ration, Electronics, Home Items
+- **Travel** → Air, Train, Bus, Cab/Auto, Road Toll
+- **Vehicle** → Fuel, Maintenance, Washing, Parking, Insurance
+- **Bills** → Phone, Internet, Subscriptions, Electricity, Rent, Society, Gas, Water, Tax, Maintenance
+- **Medical** → Doctor/Consultation, Medicines, Tests, Emergency
+- **Care** → Grooming, Massage, Personal
+- **Gifts** → Ceremonies, Charity, Donations, Family, Friends
+- **Education** → Courses, Books, Software/Tools
+- **Household** → Cleaning, Repairs
+- **Finance** → Borrowed Given, Borrowed Taken, Loan EMI, Credit Card Payment, Investment
+- **Entertainment** → Movies, Outings
+- **Income** → Salary, Business, Interest, Refund, Other Income
+- **Transfer** → Self Account, Wallet Transfer
+- **Misc** → Misc

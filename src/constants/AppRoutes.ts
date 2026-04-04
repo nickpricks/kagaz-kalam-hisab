@@ -12,8 +12,3 @@ export const AppRoutes = {
   IMPORT: '/import',
   ABOUT: '/about',
 } as const;
-
-/**
- * Type for application route paths.
- */
-export type AppRoute = typeof AppRoutes[keyof typeof AppRoutes];
